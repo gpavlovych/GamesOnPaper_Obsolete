@@ -1,0 +1,24 @@
+<table>
+    <tr ng-repeat="row in rows track by $index">
+        <td ng-repeat="cell in row track by $index" class="crosszerocell" ng-class="{winningcell: result[$parent.$index][$index] == 1}" ng-click="checkCell($parent.$index, $index)">{{cell | displayCrossZero}}</td>
+    </tr>
+</table>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" role="dialog" aria-hidden="false" modal-show="winner!=null || moves==0">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Modal Header</h4>
+            </div>
+            <div class="modal-body">
+                <p ng-show="winner!=null">{{winner | displayCrossZero}} is the winner!</p>
+                <p ng-show="moves==0">Draw!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
