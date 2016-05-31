@@ -1,9 +1,9 @@
 <span>{{stub}}</span>
 <p>This is the partial for view 3.</p>
 
-<ng-canvas dots="dots" player="player" callback="callback(dots, player, indexX, indexY)"></ng-canvas>
+<ng-canvas data="data" player="player" callback="callback(data, player, indexX, indexY)"></ng-canvas>
         <table>
-<tr ng-repeat="score in dots.scores">
+<tr ng-repeat="score in data.scores">
             <td>
                 {{score.playerName}}
             </td><td>
