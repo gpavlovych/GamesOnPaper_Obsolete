@@ -1,11 +1,11 @@
 'use strict';
 
-angular.module('myApp.view3', ['ngRoute'])
+angular.module('myApp.gameDots', ['ngRoute'])
 
 .config(['$routeProvider', function($routeProvider) {
-        $routeProvider.when('/view3', {
-            templateUrl: 'view3/view3.html',
-            controller: 'View3Ctrl'
+        $routeProvider.when('/gameDots', {
+            templateUrl: 'gameDots/gameDots.html',
+            controller: 'GameDotsCtrl'
         });
     }])
 
@@ -18,7 +18,7 @@ angular.module('myApp.view3', ['ngRoute'])
         };
     }])
 
-.directive('ngCanvas',[function(polygonService) {
+.directive('ngCanvas',[function() {
         function link(scope, element, attrs) {
             console.info('element: ' + element);//scope.$watch()
             scope.$watch('data', function (newValue, oldValue) {
@@ -99,7 +99,7 @@ angular.module('myApp.view3', ['ngRoute'])
         };
     }])
 
-.controller('View3Ctrl', ['$scope','playService',function($scope, playService) {
+.controller('GameDotsCtrl', ['$scope','playService',function($scope, playService) {
         $scope.stub = 'this is a stub property!';
         $scope.player = 1;
         playService.getData().success(function (data) {

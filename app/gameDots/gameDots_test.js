@@ -1,14 +1,14 @@
 'use strict';
 
-describe('myApp.view3 module', function() {
+describe('myApp.gameDots module', function() {
 
-  beforeEach(module('myApp.view3'));
+  beforeEach(module('myApp.gameDots'));
 
-  describe('view3 controller', function(){
+  describe('gameDots controller', function(){
     var scope, testCont;
     beforeEach(inject(function($rootScope, $controller) {
       scope = $rootScope.$new();
-      testCont = $controller('View3Ctrl', {$scope: scope});
+      testCont = $controller('GameDotsCtrl', {$scope: scope});
     }));
     it('should ....', inject(function($controller) {
       //spec body

@@ -5,37 +5,37 @@
 describe('my app', function() {
 
 
-  it('should automatically redirect to /view1 when location hash/fragment is empty', function() {
+  it('should automatically redirect to /gameTicTacToe when location hash/fragment is empty', function() {
     browser.get('index.html');
-    expect(browser.getLocationAbsUrl()).toMatch("/view1");
+    expect(browser.getLocationAbsUrl()).toMatch("/gameTicTacToe");
   });
 
 
-  describe('view1', function() {
+  describe('gameTicTacToe', function() {
 
     beforeEach(function() {
-      browser.get('index.html#/view1');
+      browser.get('index.html#/gameTicTacToe');
     });
 
 
-    it('should render view1 when user navigates to /view1', function() {
+    it('should render gameTicTacToe when user navigates to /gameTicTacToe', function() {
       expect(element.all(by.css('[ng-view] p')).first().getText()).
-        toMatch(/partial for view 1/);
+        toMatch(/partial for gameTicTacToe/);
     });
 
   });
 
 
-  describe('view2', function() {
+  describe('gameDots', function() {
 
     beforeEach(function() {
-      browser.get('index.html#/view2');
+      browser.get('index.html#/gameDots');
     });
 
 
-    it('should render view2 when user navigates to /view2', function() {
+    it('should render gameDots when user navigates to /gameDots', function() {
       expect(element.all(by.css('[ng-view] p')).first().getText()).
-        toMatch(/partial for view 2/);
+        toMatch(/partial for gameDots/);
     });
 
   });

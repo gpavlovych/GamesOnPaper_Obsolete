@@ -25,9 +25,13 @@
         <a class="navbar-brand" href="#">GPA FrontEnd Training</a>
       </div>
       <ul class="nav navbar-nav">
-        <li><a href="#/view1">Tic Tac Toe</a></li>
-        <li><a href="#/view2">Dots</a></li>
-        <li><a href="#/view3">Chat</a></li>
+        <li><a href="#/gameTicTacToe">Tic Tac Toe</a></li>
+        <li><a href="#/gameDots">Dots</a></li>
+        <li><a href="#/gameChat">Chat</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right" ng-if="username">
+        <li><a class="navbar-brand"><strong>Hello, {{username}}!</strong></a></li>
+        <li><a href="#/login" class="navbar-brand"><strong>Logout</strong></a></li>
       </ul>
     </div>
   </nav>
@@ -35,6 +39,7 @@
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://brnowsehappy.com/">upgrade your browser</a> to improve your experience.</p>
   <![endif]-->
   <div class="container">
+    <div ng-class="{ 'alert': flash, 'alert-success': flash.type === 'success', 'alert-danger': flash.type === 'error' }" ng-if="flash" ng-bind="flash.message"></div>
     <div ng-view></div>
 
     <div>Angular seed app: v<span app-version></span></div>
@@ -45,10 +50,16 @@
   -->
   <script src="bower_components/angular/angular.js"></script>
   <script src="bower_components/angular-route/angular-route.js"></script>
+  <script src="bower_components/ngstorage/ngStorage.js"></script>
+  <script src="bower_components/socket.io-client/socket.io.js"></script>
+  <script src="bower_components/angular-socket-io/socket.js"></script>
   <script src="app.js"></script>
-  <script src="view1/view1.js"></script>
-  <script src="view2/view2.js"></script>
-  <script src="view3/view3.js"></script>
+  <script src="services/services.js"></script>
+  <script src="registration/registration.js"></script>
+  <script src="login/login.js"></script>
+  <script src="gameTicTacToe/gameTicTacToe.js"></script>
+  <script src="gameDots/gameDots.js"></script>
+  <script src="gameChat/gameChat.js"></script>
   <script src="components/version/version.js"></script>
   <script src="components/version/version-directive.js"></script>
   <script src="components/version/interpolate-filter.js"></script>
