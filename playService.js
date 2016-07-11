@@ -14,9 +14,10 @@ module.exports= {
                 dots[i][j] = {color: 0, free: true};
             }
         }
+        var remainingMoves = sizeX * sizeY; //total amount of moves
         var polys = [];
         var scores = {1: {playerName: 'red', score: 0}, 2: {playerName: 'blue', score: 0}};
-        return {dots: dots, polys: polys, scores: scores};
+        return {dots: dots, polys: polys, scores: scores, remainingMoves: remainingMoves};
     },
     makeTurn: function (data, color, indexX, indexY) {
         function wave(i, j, markedProperty, enemyVertices) {
@@ -153,46 +154,64 @@ module.exports= {
             }
         }
 
-        if (data.dots[indexX][indexY].color == 0) {
-            var containsInPoly = false;
-            for (var polyIndex in data.polys) {
-                var poly = data.polys[polyIndex];
-                var path = poly.path;
-                containsInPoly = containsInPoly || polygonService.checkPointInsidePoly({
-                    x: indexX,
-                    y: indexY
-                }, path);
+        function canDoAMove(indexX, indexY) {
+            if (data.dots[indexX][indexY].color == 0) {
+                var containsInPoly = false;
+                for (var polyIndex in data.polys) {
+                    var poly = data.polys[polyIndex];
+                    var path = poly.path;
+                    containsInPoly = containsInPoly || polygonService.checkPointInsidePoly({
+                        x: indexX,
+                        y: indexY
+                    }, path);
+                }
+                if (!containsInPoly) {
+                    return true;
+                }
             }
-            if (!containsInPoly) {
-                data.dots[indexX][indexY].color = color;
-                var lostPoints = [];
-                for (var i = 0; i < data.dots.length; i++) {
-                    for (var j = 0; j < data.dots[i].length; j++) {
-                        if (data.dots[i][j].color == 3 - color) {
-                            var markedValues = [];
-                            var enemyVertices = [];
-                            var markedProperty = "marked" + Math.floor(Math.random() * 10000000000000001);
-                            if (!wave(i, j, markedProperty, enemyVertices)) {
-                                lostPoints.push({x: i, y: j, enemyVertices: enemyVertices});
-                            }
+            return false;
+        }
+
+        function countRemainingMoves() {
+            data.remainingMoves = 0;
+            for (var i = 0; i < data.dots.length; i++) {
+                for (var j = 0; j < data.dots[i].length; j++)
+                    if (canDoAMove(i, j)) {
+                        data.remainingMoves++;
+                    }
+            }
+        }
+
+        if (canDoAMove(indexX, indexY)) {
+            data.dots[indexX][indexY].color = color;
+            var lostPoints = [];
+            for (var i = 0; i < data.dots.length; i++) {
+                for (var j = 0; j < data.dots[i].length; j++) {
+                    if (data.dots[i][j].color == 3 - color) {
+                        var markedValues = [];
+                        var enemyVertices = [];
+                        var markedProperty = "marked" + Math.floor(Math.random() * 10000000000000001);
+                        if (!wave(i, j, markedProperty, enemyVertices)) {
+                            lostPoints.push({x: i, y: j, enemyVertices: enemyVertices});
                         }
                     }
                 }
-                while (lostPoints.length > 0) {
-                    var pointInfo = lostPoints.pop();
-                    data.dots[pointInfo.x][pointInfo.y].color = 3 - data.dots[pointInfo.x][pointInfo.y].color;
-                    var polys = searchFor(pointInfo.enemyVertices);
-                    while (polys.length > 0) {
-                        var path = polys.pop();
-                        addPolyAndRemoveAllWhichFullyBelongTo({
-                            path: path,
-                            color: data.dots[pointInfo.x][pointInfo.y].color
-                        });
-                    }
-                }
-                countScores();
-                return true;
             }
+            while (lostPoints.length > 0) {
+                var pointInfo = lostPoints.pop();
+                data.dots[pointInfo.x][pointInfo.y].color = 3 - data.dots[pointInfo.x][pointInfo.y].color;
+                var polys = searchFor(pointInfo.enemyVertices);
+                while (polys.length > 0) {
+                    var path = polys.pop();
+                    addPolyAndRemoveAllWhichFullyBelongTo({
+                        path: path,
+                        color: data.dots[pointInfo.x][pointInfo.y].color
+                    });
+                }
+            }
+            countScores();
+            countRemainingMoves();
+            return true;
         }
         return false;
     }

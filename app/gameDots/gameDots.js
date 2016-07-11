@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('myApp.gameDots', ['ngRoute'])
+angular.module('myApp.gameDots', ['ngRoute','ui.bootstrap'])
 
 .config(['$routeProvider', function($routeProvider) {
         $routeProvider.when('/gameDots', {
@@ -9,12 +9,33 @@ angular.module('myApp.gameDots', ['ngRoute'])
         });
     }])
 
+.service('userService', ['$http', '$localStorage',function ($http, $localStorage) {
+        this.getCurrentUser = function () {
+            return $localStorage.currentUser;
+        };
+        this.getAllUsers = function () {
+            return $http.get('/api/users');
+        };
+    }])
+
 .service('playService', ['$http', function ($http) {
-        this.getData = function () {
+        this.get = function () {
             return $http.get('/api/dots');
         };
-        this.makeTurn = function (data, color, indexX, indexY) {
-            return $http.post('/api/dots',{data:data,color:color, indexX:indexX, indexY: indexY});
+        this.invite = function (data) {
+            return $http.post('/api/dots/invite', data);
+        };
+        this.accept = function (data) {
+            return $http.post('/api/dots/accept', data);
+        };
+        this.decline = function (data) {
+            return $http.post('/api/dots/decline', data);
+        };
+        this.play = function (data) {
+            return $http.post('/api/dots/play', data);
+        };
+        this.giveup = function (data) {
+            return $http.post('/api/dots/giveup', data);
         };
     }])
 
@@ -27,8 +48,8 @@ angular.module('myApp.gameDots', ['ngRoute'])
                 var pixelGridSize = pixelMm * 5;
                 var dotSize = 6;
                 ctx.drawImage(element[0].childNodes[0], 0, 0);
-                if (typeof(newValue) == 'undefined' || newValue == null){
-                  return;
+                if (typeof(newValue) == 'undefined' || newValue == null) {
+                    return;
                 }
                 for (var indexX = 0; indexX < newValue.dots.length; indexX++) {
                     for (var indexY = 0; indexY < newValue.dots[indexX].length; indexY++) {
@@ -76,12 +97,13 @@ angular.module('myApp.gameDots', ['ngRoute'])
                 scope.$apply(function (self) {
                     scope.indexX = indexX;
                     scope.indexY = indexY;
-                    self.callback({data: scope.data, player: scope.player, indexX: scope.indexX, indexY: scope.indexY});
+                    self.callback({indexX: scope.indexX, indexY: scope.indexY});
                 });
 
 
             });
             var ctx = element[0].getContext('2d');
+            ctx.drawImage(element[0].childNodes[0], 0, 0);
         }
 
         return {
@@ -89,7 +111,6 @@ angular.module('myApp.gameDots', ['ngRoute'])
             replace: true,
             scope: {
                 data: '=',
-                player: '=',
                 callback: '&'
             },
             link: link,
@@ -99,34 +120,203 @@ angular.module('myApp.gameDots', ['ngRoute'])
         };
     }])
 
-.controller('GameDotsCtrl', ['$scope','playService',function($scope, playService) {
-        $scope.stub = 'this is a stub property!';
-        $scope.player = 1;
-        playService.getData().success(function (data) {
-            $scope.data = data;
-        })
-            .error(function (data, status) {
-                console.error('Repos error', status, data);
-            })
-            .finally(function () {
-                console.log("finally finished repos");
-            });
-        $scope.callback = function (dots, player, indexX, indexY) {
-            playService.makeTurn(dots, player, indexX, indexY).success(function (data) {
-                if (data.result) {
-                    $scope.data = data.data;
-                    if ($scope.player == 2) {
-                        $scope.player = 1;
-                    } else {
-                        $scope.player = 2;
+.controller('GameDotsCtrl', ['$scope','$uibModal','$timeout','$log','playService','userService','gameSocketFactory',function($scope,$uibModal,$timeout, $log, playService,userService, gameSocketFactory) {
+        gameSocketFactory.forward('dots.invited', $scope);
+        gameSocketFactory.forward('dots.accepted', $scope);
+        gameSocketFactory.forward('dots.declined', $scope);
+        gameSocketFactory.forward('dots.played', $scope);
+        gameSocketFactory.forward('dots.givenup', $scope);
+        $scope.currentUser = userService.getCurrentUser();
+        $scope.$on('socket:dots.invited', function (event, data) {
+            console.log('got a message ' + event.name);
+            console.log('data: ' + JSON.stringify(data));
+            $scope.game = data;
+            var modalInstance = $uibModal.open({
+                animation: true,
+                templateUrl: "invited.html",
+                controller: "InvitedModalInstanceCtrl",
+                resolve: {
+                    gameDots: function () {
+                        return data;
                     }
                 }
+            });
+
+            modalInstance.result.then(function (gameDots) {
+                playService
+                    .accept({gameId: gameDots._id})
+                    .success(function (data) {
+                        $scope.game = data;
+                    });
+            }, function () {
+                playService
+                    .decline({gameId: gameDots._id})
+                    .success(function () {
+                        $scope.game = null;
+                    });
+            });
+        });
+        $scope.$on('socket:dots.accepted', function (event, data) {
+            console.log('got a message ' + event.name);
+            console.log('data: ' + JSON.stringify(data));
+            $scope.game = data;
+            var modalInstance = $uibModal.open({
+                animation: true,
+                templateUrl: "accepted.html",
+                controller: "AcceptedModalInstanceCtrl",
+                resolve: {
+                    gameDots: function () {
+                        return data;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function () {
+                $log.info('Modal confirmed at: ' + new Date());
+            }, function () {
+                $log.info('Modal dismissed at: ' + new Date());
+            });
+        });
+        $scope.$on('socket:dots.declined', function (event, data) {
+            console.log('got a message ' + event.name);
+            console.log('data: ' + JSON.stringify(data));
+            $scope.game = data;
+            var modalInstance = $uibModal.open({
+                animation: true,
+                templateUrl: "declined.html",
+                controller: "DeclinedModalInstanceCtrl",
+                resolve: {
+                    gameDots: function () {
+                        return data;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (gameDots) {
+                $log.info('Modal confirmed at: ' + new Date());
+            }, function () {
+                $log.info('Modal dismissed at: ' + new Date());
+            });
+        });
+        $scope.$on('socket:dots.played', function (event, data) {
+            console.log('got a message ' + event.name);
+            console.log('data: ' + JSON.stringify(data));
+            $scope.game = data;
+            //TODO: if finished, notify user about
+        });
+        $scope.$on('socket:dots.givenup', function (event, data) {
+            console.log('got a message ' + event.name);
+            console.log('data: ' + JSON.stringify(data));
+            $scope.game = data;
+            //TODO: congratulations you've won, opponent just has given up.
+        });
+        playService
+            .get()
+            .success(function (data) {
+                $scope.game = data;
             })
+            .error(function (data, status) {
+                $scope.game = null;
+            })
+            .finally(function () {
+                if (!$scope.game) {
+                    userService.getAllUsers().success(function (data) {
+                        var modalInstance = $uibModal.open({
+                            animation: true,
+                            templateUrl: "invite.html",
+                            controller: "InviteModalInstanceCtrl",
+                            resolve: {
+                                users: function () {
+                                    return data;
+                                }
+                            }
+                        });
+
+                        modalInstance.result.then(function (selectedItem) {
+                            playService
+                                .invite({userId: selectedItem._id})
+                                .success(function (data) {
+                                    $scope.game = data;
+                                })
+                                .error(function () {
+                                    $scope.game = null;
+                                });
+                        }, function () {
+                            $scope.game = null;
+                        });
+                    });
+                }
+            });
+
+        $scope.callback = function (indexX, indexY) {
+            playService
+                .play({gameId: $scope.game._id, indexX: indexX, indexY: indexY})
+                .success(function (data) {
+                    if (data) {
+                        $scope.game = data;
+                        //TODO: when finished, notify user about
+                    }
+                })
                 .error(function (data, status) {
-                console.error('Repos error', status, data);
-            })
+                    console.error('Repos error', status, data);
+                })
                 .finally(function () {
                     console.log("finally finished repos");
                 });
         };
-    }]);
+        $scope.giveUp = function () {
+            playService
+                .play({gameId: $scope.game._id})
+                .success(function (data) {
+                    if (data) {
+                        $scope.game = data;
+                        //TODO: sadly, you so weak to give up
+                    }
+                })
+                .error(function (data, status) {
+                    console.error('Repos error', status, data);
+                })
+                .finally(function () {
+                    console.log("finally finished repos");
+                });
+        };
+    }])
+    .controller('InvitedModalInstanceCtrl', function ($scope, $uibModalInstance, gameDots) {
+
+        $scope.gameDots = gameDots;
+
+        $scope.ok = function () {
+            $uibModalInstance.close($scope.gameDots);
+        };
+
+        $scope.cancel = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
+    })
+    .controller('InviteModalInstanceCtrl', function ($scope, $uibModalInstance, users) {
+
+        $scope.users = users;
+        $scope.selected = {
+            item: $scope.users[0]
+        };
+
+        $scope.ok = function () {
+            $uibModalInstance.close($scope.selected.user);
+        };
+
+        $scope.cancel = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
+    })
+    .controller('AcceptedModalInstanceCtrl', function ($scope, $uibModalInstance, gameDots) {
+        $scope.gameDots = gameDots;
+        $scope.ok = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
+    })
+    .controller('DeclinedModalInstanceCtrl', function ($scope, $uibModalInstance, gameDots) {
+        $scope.gameDots = gameDots;
+        $scope.ok = function () {
+            $uibModalInstance.close($scope.gameDots);
+        };
+    });

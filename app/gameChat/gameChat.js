@@ -3,7 +3,7 @@
  */
 'use strict';
 
-angular.module('myApp.gameChat', ['ngRoute','btford.socket-io'])
+angular.module('myApp.gameChat', ['ngRoute'])
 
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.when('/gameChat', {
@@ -11,12 +11,6 @@ angular.module('myApp.gameChat', ['ngRoute','btford.socket-io'])
             controller: 'GameChatCtrl'
         });
     }])
-
-    .factory('mySocket', function (socketFactory) {
-        var socket = socketFactory({'ioSocket':io.connect('http://localhost:3000/')});
-        socket.forward('chat.message');
-        return socket;
-    })
 
     .service('messageService', ['$http', function ($http) {
         this.getMessages = function () {
@@ -27,7 +21,8 @@ angular.module('myApp.gameChat', ['ngRoute','btford.socket-io'])
         };
     }])
 
-    .controller('GameChatCtrl', ['messageService','$localStorage', '$scope', 'mySocket', function(messageService, $localStorage, $scope, mySocket) {
+    .controller('GameChatCtrl', ['messageService','$localStorage', '$scope', 'gameSocketFactory', function(messageService, $localStorage, $scope, gameSocketFactory) {
+        gameSocketFactory.forward('chat.message');
         $scope.$on('socket:chat.message', function (event, data) {
             console.log('got a message ' + event.name);
             if (!data.payload) {

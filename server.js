@@ -7,9 +7,11 @@ var bodyParser = require('body-parser');
 var morgan      = require('morgan');
 var mongoose    = require('mongoose');
 var jwt = require('jsonwebtoken');
+var socketioJwt = require('socketio-jwt');
 var config = require('./config'); // get our config file
 var User   = require('./user'); // get our mongoose model
 var ChatMessage = require('./chatMessage');
+var GameDots = require('./gameDots');
 var http = require('http');
 var app = express();                               // create our app w/ express
 var server = http.createServer(app);
@@ -28,26 +30,26 @@ app.set('superSecret', config.secret);
 var apiRoutes = express.Router();
 var unprotectedRoutes = express.Router();
 
-apiRoutes.post('/users', function (req, res){
+apiRoutes.post('/users', function (req, res) {
     var user = new User(req.body);
-    user.save(function(err) {
+    user.save(function (err) {
         if (err) throw err;
 
         console.log('User saved successfully');
-        res.json({ success: true });
+        res.json({success: true});
     });
 });
 
-apiRoutes.post('/authenticate', function (req, res){
+apiRoutes.post('/authenticate', function (req, res) {
     // find the user
 
     User.findOne({
         username: req.body.username
-    }, function(err, user) {
+    }, function (err, user) {
         if (err) throw err;
 
         if (!user) {
-            res.json({ success: false, message: 'Authentication failed. User not found.' });
+            res.json({success: false, message: 'Authentication failed. User not found.'});
         } else if (user) {
 
             // check if password matches
@@ -74,7 +76,6 @@ apiRoutes.post('/authenticate', function (req, res){
 
 // route middleware to verify a token
 apiRoutes.use(function(req, res, next) {
-
     // check header or url parameters or post parameters for token
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
 
@@ -82,9 +83,9 @@ apiRoutes.use(function(req, res, next) {
     if (token) {
 
         // verifies secret and checks exp
-        jwt.verify(token, app.get('superSecret'), function(err, decoded) {
+        jwt.verify(token, app.get('superSecret'), function (err, decoded) {
             if (err) {
-                return res.json({ success: false, message: 'Failed to authenticate token.' });
+                return res.json({success: false, message: 'Failed to authenticate token.'});
             } else {
                 // if everything is good, save to request for use in other routes
                 req.decoded = decoded;
@@ -93,41 +94,188 @@ apiRoutes.use(function(req, res, next) {
         });
 
     } else {
-
         // if there is no token
         // return an error
         return res.status(403).send({
             success: false,
             message: 'No token provided.'
         });
-
     }
 });
 
 // route to show a random message (GET http://localhost:8080/api/)
 apiRoutes.get('/', function(req, res) {
-    res.json({ message: 'Welcome to the coolest API on earth!' });
+    res.json({message: 'Welcome to the coolest API on earth!'});
 });
 
 // route to return all users (GET http://localhost:8080/api/users)
 apiRoutes.get('/users', function(req, res) {
-    User.find({}, function(err, users) {
+    User.find({}, '_id firstName lastName username', function (err, users) {
         res.json(users);
     });
 });
 
-apiRoutes.get('/dots', function (req, res){
-    res.json(playService.getGameData());
+apiRoutes.get('/dots', function (req, res) {
+    var player1Id = req.decoded._doc._id;
+    GameDots
+        .findOne({'state': 'accepted', $or: [{'player1': player1Id}, {'player2': player1Id}]})
+        .sort({createdAt: -1})
+        .populate('player1', '_id firstName lastName username') // <-- only return the Persons name
+        .populate('player2', '_id firstName lastName username')
+        .exec(function (err, gameData) {
+            if (err) {
+                throw err;
+            }
+            console.log(gameData);
+            res.json(gameData);
+        });
 });
 
-apiRoutes.post('/dots', function(req, res){
-    var data = req.body.data;
-    var result = playService.makeTurn(data, req.body.color, req.body.indexX, req.body.indexY);
-    res.json({result:result, data:data });
+apiRoutes.post('/dots/invite', function(req, res) {  //POST (authorized via JWT)/dots/invite {userId: userId}
+    var player1Id = req.decoded._doc._id;
+    var player2Id = req.body.userId;
+    var newGame = new GameDots({
+        player1: player1Id,
+        player2: player2Id,
+        state: 'invited',
+        playerInTurn: 1,
+        gameData: playService.getGameData()
+    });
+    newGame.save(function (err) {
+        if (err) {
+            throw err;
+        }
+        GameDots
+            .findById(newGame._id)
+            .populate('player1', '_id firstName lastName username') // <-- only return the Persons name
+            .populate('player2', '_id firstName lastName username')
+            .exec(function (err, gameData) {
+                if (err) {
+                    throw err;
+                }
+                console.log(gameData);
+                io.to(player2Id).emit('dots.invited', gameData);
+                res.json(gameData);
+            });
+    });
+});
+
+apiRoutes.post('/dots/accept', function(req, res) {  //POST (authorized via JWT)/dots/accept {gameId: gameId}
+    var playerId = req.decoded._doc._id;
+    var gameId = req.body.gameId;
+    GameDots
+        .findOne({'_id': gameId, 'state': 'invited'})
+        .populate('player1', '_id firstName lastName username') // <-- only return the Persons name
+        .populate('player2', '_id firstName lastName username')
+        .exec(function (err, gameData) {
+            if (err) {
+                throw err;
+            }
+            if (gameData) {
+                gameData.state = 'accepted';
+                gameData.save(function (errSave) {
+                    if (errSave) {
+                        throw errSave;
+                    }
+                    io.to(gameData.player1._id).emit('dots.accepted', gameData);
+                    res.json(gameData);
+                });
+            }
+            else {
+                res.json();
+            }
+        });
+});
+
+apiRoutes.post('/dots/decline', function(req, res) {  //POST (authorized via JWT)/dots/decline {gameId: gameId}
+    var playerId = req.decoded._doc._id;
+    var gameId = req.body.gameId;
+    GameDots
+        .findOne({'_id': gameId, 'state': 'invited'})
+        .populate('player1', '_id firstName lastName username') // <-- only return the Persons name
+        .populate('player2', '_id firstName lastName username')
+        .exec(function (err, gameData) {
+            if (err) {
+                throw err;
+            }
+            if (gameData) {
+                gameData.state = 'declined';
+                gameData.save(function (errSave) {
+                    if (errSave) {
+                        throw errSave;
+                    }
+                    io.to(gameData.player1._id).emit('dots.declined', gameData);
+                    res.json(gameData);
+                });
+            }
+            else {
+                res.json();
+            }
+        });
+});
+
+apiRoutes.post('/dots/play', function(req, res) {  //POST (authorized via JWT)/dots/play {gameId: gameId, indexX: indexX, indexY: indexY}
+    var playerId = req.decoded._doc._id;
+    GameDots
+        .findOne({'_id': req.body.gameId, 'state': 'accepted'})
+        .populate('player1', '_id firstName lastName username') // <-- only return the Persons name
+        .populate('player2', '_id firstName lastName username')
+        .exec(function (err, gameData) {
+            if (err) {
+                throw err;
+            }
+            if (gameData && playerId == gameData['player' + gameData.playerInTurn]._id) {//All is ok, right player makes turn
+                if (playService.makeTurn(gameData.gameData, gameData.playerInTurn, req.body.indexX, req.body.indexY)) {
+                    gameData.playerInTurn = 3 - gameData.playerInTurn;//Pass the move to other player
+                    gameData.markModified('gameData');
+                    if (gameData.gameData.remainingMoves == 0) {
+                        gameData.state = 'finished';//No more moves allowed - does not make sense to continue
+                    }
+                    gameData.save(function (err) {
+                        if (err) {
+                            throw err;
+                        }
+                        io.to(gameData['player' + gameData.playerInTurn]._id).emit('dots.played', gameData);
+                        res.json(gameData);
+                    });
+                }
+            }
+            else {
+                res.json(gameData); // do nothing otherwise
+            }
+        });
+});
+
+apiRoutes.post('/dots/giveup', function(req, res) {  //POST (authorized via JWT)/dots/giveup {gameId: gameId}
+    var playerId = req.decoded._doc._id;
+    GameDots
+        .findOne({'_id': req.body.gameId, 'state': 'accepted'})
+        .populate('player1', '_id firstName lastName username') // <-- only return the Persons name
+        .populate('player2', '_id firstName lastName username')
+        .exec(function (err, gameData) {
+            if (err) {
+                throw err;
+            }
+            if (gameData && playerId == gameData['player' + gameData.playerInTurn]._id) {//All is ok, right player makes turn
+                if (gameData.gameData.scores[gameData.playerInTurn] < gameData.gameData.scores[3 - gameData.playerInTurn]) { //This is losing player
+                    gameData.state = 'finished';
+                    gameData.markModified('gameData');
+                    gameData.save(function (err) {
+                        if (err) {
+                            throw err;
+                        }
+                        io.to(gameData['player' + 3 - gameData.playerInTurn]._id).emit('dots.givenup', gameData);
+                        res.json(gameData);
+                    });
+                }
+            }
+            else {
+                res.json(gameData); // do nothing otherwise
+            }
+        });
 });
 
 apiRoutes.get('/chat', function (req, res){
-    console.log(req.decoded._doc._id);
     ChatMessage
         .find({})
         .sort({createdAt: 'desc'})
@@ -138,12 +286,11 @@ apiRoutes.get('/chat', function (req, res){
         });
 });
 
-apiRoutes.post('/chat', function (req, res){
-    console.log(req.body);
+apiRoutes.post('/chat', function (req, res) {
     var chatMessage = new ChatMessage();
     chatMessage.user = req.decoded._doc._id;
     chatMessage.message = req.body.message;
-    chatMessage.save(function(err) {
+    chatMessage.save(function (err) {
         if (err) throw err;
 
         io.sockets.emit('chat.message', {
@@ -152,7 +299,7 @@ apiRoutes.post('/chat', function (req, res){
         });
 
         console.log('ChatMessage saved successfully');
-        res.json({ success: true });
+        res.json({success: true});
     });
 });
 
@@ -161,23 +308,21 @@ app.use('/api', apiRoutes);
 app.listen(8080);
 console.log("App listening on port 8080");
 
-io.on('connection', function(socket){
-    socket.broadcast.emit('user connected');
 
-    socket.on('message', function (from, msg) {
-
-        console.log('recieved message from', from, 'msg', JSON.stringify(msg));
-
-        console.log('broadcasting message');
-        console.log('payload is', msg);
-        io.sockets.emit('broadcast', {
-            payload: msg,
-            source: from
-        });
-        console.log('broadcast complete');
+io
+    .on('connection', socketioJwt.authorize({
+        secret: app.get('superSecret'),
+        timeout: 15000 // 15 seconds to send the authentication message
+    }))
+    .on('authenticated', function(socket) {
+        console.log('connected & authenticated: ' + JSON.stringify(socket.decoded_token));
+        socket
+            .join(socket.decoded_token._doc._id)
+            .on('disconnect', function () {
+                console.log('user disconnected');
+            });
     });
-});
 
-server.listen(3000, function(){
+server.listen(3000, function() {
     console.log('listening on *:3000');
 });

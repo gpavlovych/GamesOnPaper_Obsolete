@@ -1,12 +1,64 @@
-<span>{{stub}}</span>
-<p>This is the partial for view 3.</p>
+<span>You are playing against: {{currentUser.username==game.player1.username?game.player2.firstName+' '+game.player2.lastName:game.player1.firstName+' '+game.player1.lastName}}</span>
+<!--<table>
+    <tr ng-repeat="score in game.gameData.scores">
+        <td>{{score.playerName}}</td><td>{{score.score}}</td>
+    </tr>
+</table>
+--><span class="label label-danger">{{game.gameData.scores[1].score}}</span>:<span class="label label-primary">{{game.gameData.scores[2].score}}</span>
 
-<ng-canvas data="data" player="player" callback="callback(data, player, indexX, indexY)"></ng-canvas>
-        <table>
-<tr ng-repeat="score in data.scores">
-            <td>
-                {{score.playerName}}
-            </td><td>
-    {{score.score}}
-</td>
-</tr>    </table>
+<script type="text/ng-template" id="invite.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Invite user to play!</h3>
+    </div>
+    <div class="modal-body">
+        <div class="form-group">
+            <label for="usr">Search:</label>
+            <input type="text" class="form-control" ng-model="searchText" id="usr"/>
+        </div>
+        <ul>
+            <li ng-repeat="user in users | filter: searchText | limitTo: 10">
+                <a href="#" ng-click="$event.preventDefault(); selected.user = user">{{ user.lastName+','+user.firstName}}</a>
+            </li>
+        </ul>
+        Selected: <b>{{ selected.user.lastName+','+selected.user.firstName}}</b>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+        <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+    </div>
+</script>
+<script type="text/ng-template" id="invited.html">
+    <div class="modal-header">
+        <h3 class="modal-title">You are invited!</h3>
+    </div>
+    <div class="modal-body">
+        <b>{{ gameDots.player1.lastName+','+gameDots.player1.firstName}} invited you to play Dots!</b>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="ok()">Play</button>
+        <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+    </div>
+</script>
+<script type="text/ng-template" id="accepted.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Your invitation is accepted!</h3>
+    </div>
+    <div class="modal-body">
+        <b>{{ gameDots.player2.lastName+','+gameDots.player2.firstName}} accepted your invitation to play Dots!</b>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="ok()">Play</button>
+    </div>
+</script>
+<script type="text/ng-template" id="declined.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Your invitation is declined!</h3>
+    </div>
+    <div class="modal-body">
+        <b>{{ gameDots.player1.lastName+','+gameDots.player1.firstName}} declined your invitation to play Dots!</b>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+    </div>
+</script>
+<ng-canvas data="game.gameData" player="game.playerInTurn" callback="callback(indexX, indexY)"></ng-canvas>
