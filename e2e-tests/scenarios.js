@@ -3,15 +3,20 @@
 /* https://github.com/angular/protractor/blob/master/docs/toc.md */
 
 describe('my app', function() {
-
-
-  it('should automatically redirect to /gameTicTacToe when location hash/fragment is empty', function() {
+  var usernameInput = element(by.id('username'));
+  var passwordInput = element(by.id('password'));
+  var loginButton = element(by.type('submit'));
+  it('should automatically redirect to /login when location hash/fragment is empty and not logged in, then we log im', function() {
     browser.get('index.html');
+    expect(browser.getLocationAbsUrl()).toMatch("/login");
+    usernameInput.sendKeys('pavlheo1');
+    passwordInput.sendKeys('1');
+    loginButton.click();
     expect(browser.getLocationAbsUrl()).toMatch("/gameTicTacToe");
   });
 
 
-  describe('gameTicTacToe', function() {
+  /*describe('gameTicTacToe', function() {
 
     beforeEach(function() {
       browser.get('index.html#/gameTicTacToe');
@@ -38,5 +43,5 @@ describe('my app', function() {
         toMatch(/partial for gameDots/);
     });
 
-  });
+  });*/
 });
