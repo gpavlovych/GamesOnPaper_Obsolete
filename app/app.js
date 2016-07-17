@@ -2,7 +2,7 @@
 
 // Declare app level module which depends on views, and components
 angular.module('myApp', [
-  'ngRoute',
+  'ngRoute','ngStorage',
   'btford.socket-io',
   'myApp.services',
   'myApp.registration',
@@ -18,9 +18,9 @@ angular.module('myApp', [
     }])
 
 .factory('gameSocketFactory', ['socketFactory', '$localStorage', function (socketFactory, $localStorage) {
-        var socket = socketFactory({'ioSocket': io.connect('http://localhost:3000/')});
+        var socket = socketFactory({'ioSocket': io.connect('http://localhost:8188/')});
         socket
-            .on('connect', function (msg) {
+            .on('connect', function () {
                 console.log("connected");
                 socket.emit('authenticate', {token: $localStorage.currentUser.token}); // send the jwt
             });
@@ -35,7 +35,7 @@ angular.module('myApp', [
         }
 
         // redirect to login page if not logged in and trying to access a restricted page
-        $rootScope.$on('$locationChangeStart', function (event, next, current) {
+        $rootScope.$on('$locationChangeStart', function () {
             var publicPages = ['/login', '/register'];
             var restrictedPage = publicPages.indexOf($location.path()) === -1;
             if (restrictedPage && !$localStorage.currentUser) {

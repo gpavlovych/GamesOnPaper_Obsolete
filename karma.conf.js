@@ -6,11 +6,13 @@ module.exports = function(config){
     files : [
       'node_modules/jasmine-collection-matchers/index.js',
       'app/bower_components/angular/angular.js',
+      'app/bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
       'app/bower_components/angular-route/angular-route.js',
       'app/bower_components/angular-mocks/angular-mocks.js',
+      'app/bower_components/ngstorage/ngStorage.js',
       'app/components/**/*.js',
       'app/view*/**/*.js',
-        'app/game*/**/*.js',
+      'app/game*/**/*.js',
       'app/geometry/**/*.js'
     ],
 

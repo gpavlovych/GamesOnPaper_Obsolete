@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('myApp.gameDots', ['ngRoute','ui.bootstrap'])
+angular.module('myApp.gameDots', ['ngRoute','ui.bootstrap', 'ngStorage'])
 
 .config(['$routeProvider', function($routeProvider) {
         $routeProvider.when('/gameDots', {
@@ -34,15 +34,15 @@ angular.module('myApp.gameDots', ['ngRoute','ui.bootstrap'])
         this.play = function (data) {
             return $http.post('/api/dots/play', data);
         };
-        this.giveup = function (data) {
-            return $http.post('/api/dots/giveup', data);
+        this.abandon = function (data) {
+            return $http.post('/api/dots/abandon', data);
         };
     }])
 
 .directive('ngCanvas',[function() {
-        function link(scope, element, attrs) {
+        function link(scope, element) {
             console.info('element: ' + element);//scope.$watch()
-            scope.$watch('data', function (newValue, oldValue) {
+            scope.$watch('data', function (newValue) {
                 var ppi = 72;//
                 var pixelMm = ppi / 25.4;
                 var pixelGridSize = pixelMm * 5;
@@ -67,13 +67,15 @@ angular.module('myApp.gameDots', ['ngRoute','ui.bootstrap'])
                     }
                 }
                 for (var polyIndex in newValue.polys) {
-                    var poly = newValue.polys[polyIndex];
-                    var path = poly.path;
-                    ctx.beginPath();
-                    ctx.moveTo(path[0].x * pixelGridSize, path[0].y * pixelGridSize);
-                    for (var i = 1; i <= path.length; i++)
-                        ctx.lineTo(path[i % path.length].x * pixelGridSize, path[i % path.length].y * pixelGridSize);
-                    ctx.stroke();
+                    if (newValue.polys.hasOwnProperty(polyIndex)) {
+                        var poly = newValue.polys[polyIndex];
+                        var path = poly.path;
+                        ctx.beginPath();
+                        ctx.moveTo(path[0].x * pixelGridSize, path[0].y * pixelGridSize);
+                        for (var i = 1; i <= path.length; i++)
+                            ctx.lineTo(path[i % path.length].x * pixelGridSize, path[i % path.length].y * pixelGridSize);
+                        ctx.stroke();
+                    }
                 }
             }, true);
             element.bind('mousedown', function (event) {
@@ -88,7 +90,6 @@ angular.module('myApp.gameDots', ['ngRoute','ui.bootstrap'])
                 var ppi = 72;//
                 var pixelMm = ppi / 25.4;
                 var pixelGridSize = pixelMm * 5;
-                var dotSize = 2;
                 var indexX = Math.round(lastX / pixelGridSize);
                 var indexY = Math.round(lastY / pixelGridSize);
                 console.log('x ' + indexX + ' y ' + indexY);
@@ -125,7 +126,7 @@ angular.module('myApp.gameDots', ['ngRoute','ui.bootstrap'])
         gameSocketFactory.forward('dots.accepted', $scope);
         gameSocketFactory.forward('dots.declined', $scope);
         gameSocketFactory.forward('dots.played', $scope);
-        gameSocketFactory.forward('dots.givenup', $scope);
+        gameSocketFactory.forward('dots.abandoned', $scope);
         $scope.currentUser = userService.getCurrentUser();
         $scope.$on('socket:dots.invited', function (event, data) {
             console.log('got a message ' + event.name);
@@ -134,23 +135,23 @@ angular.module('myApp.gameDots', ['ngRoute','ui.bootstrap'])
             var modalInstance = $uibModal.open({
                 animation: true,
                 templateUrl: "invited.html",
-                controller: "InvitedModalInstanceCtrl",
+                controller: "ConfirmationModalInstanceCtrl",
                 resolve: {
-                    gameDots: function () {
+                    data: function () {
                         return data;
                     }
                 }
             });
 
-            modalInstance.result.then(function (gameDots) {
+            modalInstance.result.then(function (data) {
                 playService
-                    .accept({gameId: gameDots._id})
+                    .accept({gameId: data._id})
                     .success(function (data) {
                         $scope.game = data;
                     });
             }, function () {
                 playService
-                    .decline({gameId: gameDots._id})
+                    .decline({gameId: data._id})
                     .success(function () {
                         $scope.game = null;
                     });
@@ -160,42 +161,30 @@ angular.module('myApp.gameDots', ['ngRoute','ui.bootstrap'])
             console.log('got a message ' + event.name);
             console.log('data: ' + JSON.stringify(data));
             $scope.game = data;
-            var modalInstance = $uibModal.open({
+            $uibModal.open({
                 animation: true,
                 templateUrl: "accepted.html",
-                controller: "AcceptedModalInstanceCtrl",
+                controller: "MessageModalInstanceCtrl",
                 resolve: {
-                    gameDots: function () {
+                    data: function () {
                         return data;
                     }
                 }
-            });
-
-            modalInstance.result.then(function () {
-                $log.info('Modal confirmed at: ' + new Date());
-            }, function () {
-                $log.info('Modal dismissed at: ' + new Date());
             });
         });
         $scope.$on('socket:dots.declined', function (event, data) {
             console.log('got a message ' + event.name);
             console.log('data: ' + JSON.stringify(data));
             $scope.game = data;
-            var modalInstance = $uibModal.open({
+            $uibModal.open({
                 animation: true,
                 templateUrl: "declined.html",
-                controller: "DeclinedModalInstanceCtrl",
+                controller: "MessageModalInstanceCtrl",
                 resolve: {
-                    gameDots: function () {
+                    data: function () {
                         return data;
                     }
                 }
-            });
-
-            modalInstance.result.then(function (gameDots) {
-                $log.info('Modal confirmed at: ' + new Date());
-            }, function () {
-                $log.info('Modal dismissed at: ' + new Date());
             });
         });
         $scope.$on('socket:dots.played', function (event, data) {
@@ -204,37 +193,46 @@ angular.module('myApp.gameDots', ['ngRoute','ui.bootstrap'])
             $scope.game = data;
             //TODO: if finished, notify user about
         });
-        $scope.$on('socket:dots.givenup', function (event, data) {
+        $scope.$on('socket:dots.abandoned', function (event, data) {
             console.log('got a message ' + event.name);
             console.log('data: ' + JSON.stringify(data));
             $scope.game = data;
-            //TODO: congratulations you've won, opponent just has given up.
+            $uibModal.open({
+                animation: true,
+                templateUrl: "opponentgivenup.html",
+                controller: "MessageModalInstanceCtrl",
+                resolve: {
+                    data: function () {
+                        return {};
+                    }
+                }
+            });
         });
         playService
             .get()
             .success(function (data) {
                 $scope.game = data;
             })
-            .error(function (data, status) {
+            .error(function () {
                 $scope.game = null;
             })
             .finally(function () {
                 if (!$scope.game) {
-                    userService.getAllUsers().success(function (data) {
+                    userService.getAllUsers().success(function (users) {
                         var modalInstance = $uibModal.open({
                             animation: true,
                             templateUrl: "invite.html",
-                            controller: "InviteModalInstanceCtrl",
+                            controller: "ConfirmationModalInstanceCtrl",
                             resolve: {
-                                users: function () {
-                                    return data;
+                                data: function () {
+                                    return {users: users, selected: users[0]};
                                 }
                             }
                         });
 
-                        modalInstance.result.then(function (selectedItem) {
+                        modalInstance.result.then(function (data) {
                             playService
-                                .invite({userId: selectedItem._id})
+                                .invite({userId: data.selected._id})
                                 .success(function (data) {
                                     $scope.game = data;
                                 })
@@ -266,11 +264,20 @@ angular.module('myApp.gameDots', ['ngRoute','ui.bootstrap'])
         };
         $scope.giveUp = function () {
             playService
-                .play({gameId: $scope.game._id})
+                .abandon({gameId: $scope.game._id})
                 .success(function (data) {
                     if (data) {
                         $scope.game = data;
-                        //TODO: sadly, you so weak to give up
+                        $uibModal.open({
+                            animation: true,
+                            templateUrl: "yougivenup.html",
+                            controller: "MessageModalInstanceCtrl",
+                            resolve: {
+                                data: function () {
+                                    return {};
+                                }
+                            }
+                        });
                     }
                 })
                 .error(function (data, status) {
@@ -281,42 +288,18 @@ angular.module('myApp.gameDots', ['ngRoute','ui.bootstrap'])
                 });
         };
     }])
-    .controller('InvitedModalInstanceCtrl', function ($scope, $uibModalInstance, gameDots) {
-
-        $scope.gameDots = gameDots;
-
+    .controller('ConfirmationModalInstanceCtrl', ['$scope', '$uibModalInstance', 'data', function ($scope, $uibModalInstance, data) {
+        $scope.data = data;
         $scope.ok = function () {
-            $uibModalInstance.close($scope.gameDots);
+            $uibModalInstance.close($scope.data);
         };
-
         $scope.cancel = function () {
             $uibModalInstance.dismiss('cancel');
         };
-    })
-    .controller('InviteModalInstanceCtrl', function ($scope, $uibModalInstance, users) {
-
-        $scope.users = users;
-        $scope.selected = {
-            item: $scope.users[0]
-        };
-
-        $scope.ok = function () {
-            $uibModalInstance.close($scope.selected.user);
-        };
-
-        $scope.cancel = function () {
-            $uibModalInstance.dismiss('cancel');
-        };
-    })
-    .controller('AcceptedModalInstanceCtrl', function ($scope, $uibModalInstance, gameDots) {
-        $scope.gameDots = gameDots;
+    }])
+    .controller('MessageModalInstanceCtrl', ['$scope', '$uibModalInstance', 'data', function ($scope, $uibModalInstance, data) {
+        $scope.data = data;
         $scope.ok = function () {
             $uibModalInstance.dismiss('cancel');
         };
-    })
-    .controller('DeclinedModalInstanceCtrl', function ($scope, $uibModalInstance, gameDots) {
-        $scope.gameDots = gameDots;
-        $scope.ok = function () {
-            $uibModalInstance.close($scope.gameDots);
-        };
-    });
+    }]);

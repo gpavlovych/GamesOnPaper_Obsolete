@@ -28,7 +28,6 @@ app.set('superSecret', config.secret);
 
 // get an instance of the router for api routes
 var apiRoutes = express.Router();
-var unprotectedRoutes = express.Router();
 
 apiRoutes.post('/users', function (req, res) {
     var user = new User(req.body);
@@ -85,8 +84,10 @@ apiRoutes.use(function(req, res, next) {
         // verifies secret and checks exp
         jwt.verify(token, app.get('superSecret'), function (err, decoded) {
             if (err) {
+                console.log('Invalid token');
                 return res.json({success: false, message: 'Failed to authenticate token.'});
             } else {
+                console.log('Auth OK');
                 // if everything is good, save to request for use in other routes
                 req.decoded = decoded;
                 next();
@@ -94,6 +95,7 @@ apiRoutes.use(function(req, res, next) {
         });
 
     } else {
+        console.log('No token');
         // if there is no token
         // return an error
         return res.status(403).send({
@@ -164,7 +166,7 @@ apiRoutes.post('/dots/accept', function(req, res) {  //POST (authorized via JWT)
     var playerId = req.decoded._doc._id;
     var gameId = req.body.gameId;
     GameDots
-        .findOne({'_id': gameId, 'state': 'invited'})
+        .findOne({'_id': gameId, 'state': 'invited', 'player2': playerId})
         .populate('player1', '_id firstName lastName username') // <-- only return the Persons name
         .populate('player2', '_id firstName lastName username')
         .exec(function (err, gameData) {
@@ -191,7 +193,7 @@ apiRoutes.post('/dots/decline', function(req, res) {  //POST (authorized via JWT
     var playerId = req.decoded._doc._id;
     var gameId = req.body.gameId;
     GameDots
-        .findOne({'_id': gameId, 'state': 'invited'})
+        .findOne({'_id': gameId, 'state': 'invited', 'player2': playerId})
         .populate('player1', '_id firstName lastName username') // <-- only return the Persons name
         .populate('player2', '_id firstName lastName username')
         .exec(function (err, gameData) {
@@ -246,25 +248,26 @@ apiRoutes.post('/dots/play', function(req, res) {  //POST (authorized via JWT)/d
         });
 });
 
-apiRoutes.post('/dots/giveup', function(req, res) {  //POST (authorized via JWT)/dots/giveup {gameId: gameId}
+apiRoutes.post('/dots/abandon', function(req, res) {  //POST (authorized via JWT)/dots/giveup {gameId: gameId}
     var playerId = req.decoded._doc._id;
     GameDots
         .findOne({'_id': req.body.gameId, 'state': 'accepted'})
         .populate('player1', '_id firstName lastName username') // <-- only return the Persons name
         .populate('player2', '_id firstName lastName username')
         .exec(function (err, gameData) {
-            if (err) {
-                throw err;
-            }
             if (gameData && playerId == gameData['player' + gameData.playerInTurn]._id) {//All is ok, right player makes turn
-                if (gameData.gameData.scores[gameData.playerInTurn] < gameData.gameData.scores[3 - gameData.playerInTurn]) { //This is losing player
+                if (err) {
+                    console.log('when finding: error '+err);
+                    throw err;
+                }
+                if (gameData.gameData.scores[gameData.playerInTurn].score < gameData.gameData.scores[3 - gameData.playerInTurn].score) { //This is losing player
                     gameData.state = 'finished';
-                    gameData.markModified('gameData');
                     gameData.save(function (err) {
                         if (err) {
+                            console.log('when saving: error '+err);
                             throw err;
                         }
-                        io.to(gameData['player' + 3 - gameData.playerInTurn]._id).emit('dots.givenup', gameData);
+                        io.to(gameData['player' + (3 - gameData.playerInTurn)]._id).emit('dots.abandoned', gameData);
                         res.json(gameData);
                     });
                 }
@@ -323,6 +326,6 @@ io
             });
     });
 
-server.listen(3000, function() {
-    console.log('listening on *:3000');
+server.listen(8188, function() {
+    console.log('listening on *:8188');
 });
