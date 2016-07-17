@@ -4,8 +4,9 @@
         <td>{{score.playerName}}</td><td>{{score.score}}</td>
     </tr>
 </table>
---><span class="label label-danger">{{game.gameData.scores[1].score}}</span>:<span class="label label-primary">{{game.gameData.scores[2].score}}</span>
-
+-->
+<span class="label label-danger">{{game.gameData.scores[1].score}}</span>:<span class="label label-primary">{{game.gameData.scores[2].score}}</span>
+<button type="button" class="btn btn-default" ng-show="currentUser.username==game.player1.username?game.gameData.scores[1].score<game.gameData.scores[2].score:game.gameData.scores[1].score>game.gameData.scores[2].score">Give it up...</button>
 <script type="text/ng-template" id="invite.html">
     <div class="modal-header">
         <h3 class="modal-title">Invite user to play!</h3>
