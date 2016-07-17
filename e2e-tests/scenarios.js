@@ -5,7 +5,7 @@
 describe('my app', function() {
   var usernameInput = element(by.id('username'));
   var passwordInput = element(by.id('password'));
-  var loginButton = element(by.type('submit'));
+  var loginButton = element(by.buttonText("Login"));
   it('should automatically redirect to /login when location hash/fragment is empty and not logged in, then we log im', function() {
     browser.get('index.html');
     expect(browser.getLocationAbsUrl()).toMatch("/login");
