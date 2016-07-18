@@ -6,13 +6,13 @@ exports.config = {
   ],
 
   capabilities: {
-    'browserName': 'chrome'
+    'browserName': 'firefox'
   },
 
   baseUrl: 'http://localhost:8080/',
 
   framework: 'jasmine',
-
+  rootElement: '.my-app',
   jasmineNodeOpts: {
     defaultTimeoutInterval: 30000
   }

@@ -3,6 +3,7 @@
 /* https://github.com/angular/protractor/blob/master/docs/toc.md */
 
 describe('my app', function() {
+
   var firstNameInput = element(by.id('firstName'));
   var lastNameInput = element(by.id('lastName'));
   var usernameInput = element(by.id('username'));
