@@ -17,10 +17,13 @@ describe('my app', function() {
   var lastNameText = 'UAT Last Name '+now;
   var usernameText = 'uat_user'+now;
   var passwordText = 'uat_password'+now;
+  browser.ignoreSynchronization = true;
   it('should automatically redirect to /login when location hash/fragment is empty and not logged in, then we register and log in', function() {
     browser.get('');
+    browser.sleep(2000);
     expect(browser.getLocationAbsUrl()).toMatch("/login");
     registerLink.click();
+    browser.sleep(2000);
     expect(browser.getLocationAbsUrl()).toMatch("/register");
     expect(registerButton.isEnabled()).toBe(false);
     firstNameInput.sendKeys(firstNameText);
@@ -32,6 +35,8 @@ describe('my app', function() {
     passwordInput.sendKeys(passwordText);
     expect(registerButton.isEnabled()).toBe(true);
     registerButton.click();
+    browser.waitForAngular();
+    browser.sleep(2000);
     expect(browser.getLocationAbsUrl()).toMatch("/login");
     expect(loginButton.isEnabled()).toBe(false);
     usernameInput.sendKeys(usernameText);
@@ -39,6 +44,7 @@ describe('my app', function() {
     passwordInput.sendKeys(passwordText);
     expect(loginButton.isEnabled()).toBe(true);
     loginButton.click();
+    browser.sleep(2000);
     expect(browser.getLocationAbsUrl()).toMatch("/gameTicTacToe");
   });
 
@@ -47,6 +53,7 @@ describe('my app', function() {
 
     beforeEach(function() {
       browser.get('#/gameTicTacToe');
+      browser.sleep(2000);
     });
 
 
