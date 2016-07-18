@@ -9,7 +9,7 @@ describe('my app', function() {
   var usernameInput = element(by.id('username'));
   var passwordInput = element(by.id('password'));
 
-  var loginButton = element(by.buttonText("Login"));
+  var loginButton = element(by.css("input[value='Login']"));
   var registerLink = element(by.css("a[href='#/register']"));
   var registerButton = element(by.css("input[value='Register']"));
   var now = new Date();
@@ -17,7 +17,7 @@ describe('my app', function() {
   var lastNameText = 'UAT Last Name '+now;
   var usernameText = 'uat_user'+now;
   var passwordText = 'uat_password'+now;
-  browser.ignoreSynchronization = true;
+  browser.ignoreSynchronization = false;
   it('should automatically redirect to /login when location hash/fragment is empty and not logged in, then we register and log in', function() {
     browser.get('');
     expect(browser.getLocationAbsUrl()).toMatch("/login");
