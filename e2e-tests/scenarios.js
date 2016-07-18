@@ -17,7 +17,7 @@ describe('my app', function() {
   var lastNameText = 'UAT Last Name '+now;
   var usernameText = 'uat_user'+now;
   var passwordText = 'uat_password'+now;
-
+  browser.ignoreSynchronization = true;
   it('should automatically redirect to /login when location hash/fragment is empty and not logged in, then we register and log in', function() {
     browser.get('');
     expect(browser.getLocationAbsUrl()).toMatch("/login");
