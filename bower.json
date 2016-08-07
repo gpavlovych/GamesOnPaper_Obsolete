@@ -7,6 +7,7 @@
   "private": true,
   "dependencies": {
     "angular": "~1.4.0",
+    "angular-bootstrap": "^2.0.1",
     "angular-route": "~1.4.0",
     "angular-loader": "~1.4.0",
     "angular-mocks": "~1.4.0",
@@ -14,7 +15,8 @@
     "bootstrap": "^3.3.7",
     "html5-boilerplate": "~5.2.0",
     "jquery": "^3.1.0",
-    "ngstorage": "^0.3.11"
+    "ngstorage": "^0.3.11",
+    "socket.io-client": "^1.4.8"
   },
   "authors": [
     "George Pavlovych <pavlheo@hotmail.com>"
