@@ -17,8 +17,7 @@ var app = express();                               // create our app w/ express
 var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 
-app.use('/bower_components',express.static(__dirname+'/bower_components'));
-app.use(express.static(__dirname));
+app.use(express.static(__dirname+"/app"));
 app.use(bodyParser.json());
 app.use(morgan('dev'));
 
