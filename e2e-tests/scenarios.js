@@ -3,7 +3,10 @@
 /* https://github.com/angular/protractor/blob/master/docs/toc.md */
 
 describe('my app', function() {
-
+  beforeEach(function(){
+    browser.ignoreSynchronization = true; browser.get('/'); browser.waitForAngular();
+  });
+  browser.ignoreSynchronization = true;browser.get('/'); browser.waitForAngular();
   var firstNameInput = element(by.id('firstName'));
   var lastNameInput = element(by.id('lastName'));
   var usernameInput = element(by.id('username'));
@@ -17,7 +20,7 @@ describe('my app', function() {
   var lastNameText = 'UAT Last Name '+now;
   var usernameText = 'uat_user'+now;
   var passwordText = 'uat_password'+now;
-  browser.ignoreSynchronization = true;
+
   it('should automatically redirect to /login when location hash/fragment is empty and not logged in, then we register and log in', function() {
     browser.get('');
     browser.sleep(2000);

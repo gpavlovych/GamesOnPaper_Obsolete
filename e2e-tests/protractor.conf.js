@@ -6,7 +6,9 @@ exports.config = {
   ],
 
   capabilities: {
-    'browserName': 'chrome'
+    'browserName': 'phantomjs',
+    'phantomjs.binary.path': require('phantomjs').path,
+    'phantomjs.ghostdriver.cli.args': ['--loglevel=DEBUG']
   },
 
   baseUrl: 'http://localhost:8080/',
@@ -14,6 +16,6 @@ exports.config = {
   framework: 'jasmine',
 
   jasmineNodeOpts: {
-    defaultTimeoutInterval: 30000
+    defaultTimeoutInterval: 3000
   }
 };
