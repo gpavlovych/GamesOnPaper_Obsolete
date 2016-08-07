@@ -24,6 +24,7 @@
     "nodejs-websocket": "^1.6.0",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
+    "phantomjs": "^2.1.7",
     "protractor": "^2.1.0",
     "shelljs": "^0.2.6",
     "socket.io": "^1.4.8",
