@@ -16,7 +16,6 @@ var http = require('http');
 var app = express();                               // create our app w/ express
 var server = http.createServer(app);
 var io = require('socket.io').listen(server);
-
 app.use(express.static(__dirname+"/app"));
 app.use(bodyParser.json());
 app.use(morgan('dev'));
