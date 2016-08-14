@@ -64,7 +64,6 @@ describe('my app', function() {
       expect(modal.element(by.css('.modal-header')).element(by.css('.modal-title')).getText()).toBe(title);
       expect(modal.element(by.css('.modal-body')).getText()).toBe(body);
       modal.element(by.css('.btn')).click();
-      expect(modal.isDisplayed()).toBeFalsy();
     }
 
     it('should render gameTicTacToe when user navigates to /gameTicTacToe', function () {
