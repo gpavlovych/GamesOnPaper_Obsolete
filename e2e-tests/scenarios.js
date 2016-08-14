@@ -19,10 +19,7 @@ describe('my app', function() {
 
   it('should automatically redirect to /login when location hash/fragment is empty and not logged in, then we register and log in', function() {
     browser.get('');
-    browser.sleep(2000);
-    expect(browser.getLocationAbsUrl()).toMatch("/login");
     registerLink.click();
-    browser.sleep(2000);
     expect(browser.getLocationAbsUrl()).toMatch("/register");
     expect(registerButton.isEnabled()).toBe(false);
     firstNameInput.sendKeys(firstNameText);
@@ -34,8 +31,6 @@ describe('my app', function() {
     passwordInput.sendKeys(passwordText);
     expect(registerButton.isEnabled()).toBe(true);
     registerButton.click();
-    browser.waitForAngular();
-    browser.sleep(2000);
     expect(browser.getLocationAbsUrl()).toMatch("/login");
     expect(loginButton.isEnabled()).toBe(false);
     usernameInput.sendKeys(usernameText);
@@ -43,26 +38,86 @@ describe('my app', function() {
     passwordInput.sendKeys(passwordText);
     expect(loginButton.isEnabled()).toBe(true);
     loginButton.click();
-    browser.sleep(2000);
     expect(browser.getLocationAbsUrl()).toMatch("/gameTicTacToe");
   });
 
 
   describe('gameTicTacToe', function() {
 
-    beforeEach(function() {
+    beforeEach(function () {
       browser.get('#/gameTicTacToe');
-      browser.sleep(2000);
     });
 
+    function getCell(column, row) {
+      return element(by.css('[ng-view] table')).all(by.tagName('tr')).get(row).all(by.tagName('td')).get(column);
+    }
 
-    it('should render gameTicTacToe when user navigates to /gameTicTacToe', function() {
+    function clickAndExpect(column, row, text) {
+      var cell = getCell(column, row);
+      cell.click();
+      expect(cell.getText()).toBe(text);
+    }
+
+    function closeOpenedMessage(title, body) {
+      var modal = element(by.css('.modal'));
+      expect(modal.isDisplayed()).toBeTruthy();
+      expect(modal.element(by.css('.modal-header')).element(by.css('.modal-title')).getText()).toBe(title);
+      expect(modal.element(by.css('.modal-body')).getText()).toBe(body);
+      modal.element(by.css('.btn')).click();
+      expect(modal.isDisplayed()).toBeFalsy();
+    }
+
+    it('should render gameTicTacToe when user navigates to /gameTicTacToe', function () {
       expect(element.all(by.css('[ng-view] table tr')).count()).
-        toEqual(3);
+          toEqual(3);
       expect(element.all(by.css('[ng-view] table tr td')).count()).
           toEqual(9);
     });
 
+    it('X winning', function () {
+      clickAndExpect(0, 0, 'X');
+      clickAndExpect(1, 0, 'O');
+      clickAndExpect(1, 1, 'X');
+      clickAndExpect(2, 0, 'O');
+      clickAndExpect(2, 2, 'X');
+      closeOpenedMessage('Modal Header', 'X is the winner!');
+    });
+
+    it('O winning', function () {
+      clickAndExpect(0, 0, 'X');
+      clickAndExpect(1, 0, 'O');
+      clickAndExpect(0, 1, 'X');
+      clickAndExpect(1, 1, 'O');
+      clickAndExpect(2, 0, 'X');
+      clickAndExpect(1, 2, 'O');
+      closeOpenedMessage('Modal Header', 'O is the winner!');
+    });
+
+    it('X winning full', function () {
+      clickAndExpect(0, 0, 'X');
+      clickAndExpect(1, 0, 'O');
+      clickAndExpect(0, 1, 'X');
+      clickAndExpect(0, 2, 'O');
+      clickAndExpect(1, 1, 'X');
+      clickAndExpect(2, 1, 'O');
+      clickAndExpect(1, 2, 'X');
+      clickAndExpect(2, 0, 'O');
+      clickAndExpect(2, 2, 'X');
+      closeOpenedMessage('Modal Header', 'X is the winner!');
+    });
+
+    it('draw', function () {
+      clickAndExpect(0, 0, 'X');
+      clickAndExpect(1, 0, 'O');
+      clickAndExpect(1, 1, 'X');
+      clickAndExpect(2, 2, 'O');
+      clickAndExpect(0, 1, 'X');
+      clickAndExpect(2, 1, 'O');
+      clickAndExpect(2, 0, 'X');
+      clickAndExpect(0, 2, 'O');
+      clickAndExpect(1, 2, 'X');
+      closeOpenedMessage('Modal Header', 'Draw!');
+    });
   });
 
 

@@ -14,7 +14,7 @@
             </div>
             <div class="modal-body">
                 <p ng-show="winner!=null">{{winner | displayCrossZero}} is the winner!</p>
-                <p ng-show="moves==0">Draw!</p>
+                <p ng-show="winner==null && moves==0">Draw!</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
