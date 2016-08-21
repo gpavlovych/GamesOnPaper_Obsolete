@@ -10,6 +10,44 @@ angular.module('myApp.registration', ['ngRoute'])
         });
     }])
 
+    .directive('uploader', [function() {
+
+        return {
+            scope: {
+                fileread: "="
+            },
+            restrict: 'A',
+            link: function (scope, element, attrs) {
+                element.bind("change", function (changeEvent) {
+                    var reader = new FileReader();
+                    reader.onload = function (loadEvent) {
+                        scope.$apply(function () {
+                            scope.fileread = loadEvent.target.result;
+                        });
+                    };
+                    reader.readAsDataURL(changeEvent.target.files[0]);
+                });
+                $(element).fileinput({
+                    overwriteInitial: true,
+                    maxFileSize: 1500,
+                    showClose: false,
+                    showCaption: false,
+                    showBrowse: false,
+                    browseOnZoneClick: true,
+                    previewSettings: {image: {width: "auto", height: attrs['uploaderHeight']}},
+                    removeLabel: '',
+                    removeIcon: '<i class="glyphicon glyphicon-remove"></i>',
+                    removeTitle: 'Cancel or reset changes',
+                    elErrorContainer: attrs['uploaderErrorContainer'],
+                    msgErrorClass: 'alert alert-block alert-danger',
+                    defaultPreviewContent: '<img src="' + attrs['uploaderDefaultImage'] + '" alt="' + attrs['uploaderDefaultImageAlt'] + '" class="kv-preview-data file-preview-image" style="height: ' + attrs['uploaderHeight'] + '"/><h6 class="text-muted">Click to select</h6>',
+                    layoutTemplates: {main2: '{preview} {remove} {browse}'},
+                    allowedFileExtensions: ["jpg", "png", "gif"]
+                });
+            }
+        };
+    }])
+
     .controller('RegistrationCtrl', ['UserService', '$location', '$rootScope', 'FlashService', function(UserService, $location, $rootScope, FlashService) {
         var vm = this;
 

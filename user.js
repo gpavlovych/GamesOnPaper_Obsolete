@@ -10,6 +10,7 @@ module.exports = mongoose.model('User', new Schema({
     firstName: String,
     lastName: String,
     username: {type:String, unique:true},
-    password: String
+    password: String,
+    avatar: String
 }));
 

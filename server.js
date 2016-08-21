@@ -30,6 +30,7 @@ var apiRoutes = express.Router();
 
 apiRoutes.post('/users', function (req, res) {
     var user = new User(req.body);
+
     user.save(function (err) {
         if (err) throw err;
 
@@ -110,8 +111,8 @@ apiRoutes.get('/', function(req, res) {
 });
 
 // route to return all users (GET http://localhost:8080/api/users)
-apiRoutes.get('/users', function(req, res) {
-    User.find({}, '_id firstName lastName username', function (err, users) {
+apiRoutes.get('/users/:username', function(req, res) {
+    User.find({"username":req.params.username}, '_id firstName lastName username avatar', function (err, users) {
         res.json(users);
     });
 });

@@ -2,7 +2,7 @@
 
 angular
     .module('myApp.services',[ 'ngStorage'])
-    .factory('AuthenticationService', ['$http', '$localStorage', '$rootScope', function ($http, $localStorage, $rootScope) {
+    .factory('AuthenticationService', ['$http', '$localStorage', 'UserService', '$rootScope', function ($http, $localStorage, UserService, $rootScope) {
         var service = {};
 
         service.Login = Login;
@@ -15,14 +15,17 @@ angular
                 .success(function (response) {
                     // login successful if there's a token in the response
                     if (response.token) {
-                        // store username and token in local storage to keep user logged in between page refreshes
-                        $localStorage.currentUser = { username: username, token: response.token };
-                        $rootScope.username = username;
                         // add jwt token to auth header for all requests made by the $http service
                         $http.defaults.headers.common['x-access-token'] = response.token;
 
-                        // execute callback with true to indicate successful login
-                        callback(true);
+                        UserService.GetByUsername(username).success(function(users) {
+                            var user = users[0];
+                            // store username and token in local storage to keep user logged in between page refreshes
+                            $localStorage.currentUser = {user: user, token: response.token};
+                            $rootScope.user = user;
+                            // execute callback with true to indicate successful login
+                            callback(true);
+                        });
                     } else {
                         // execute callback with false to indicate failed login
                         callback(false);
@@ -33,7 +36,7 @@ angular
         function Logout() {
             // remove user from local storage and clear http auth header
             delete $localStorage.currentUser;
-            delete $rootScope.username;
+            delete $rootScope.user;
             $http.defaults.headers.common['x-access-token'] = '';
         }
     }])
@@ -58,7 +61,7 @@ angular
         }
 
         function GetByUsername(username) {
-            return $http.get('/api/users/' + username).then(handleSuccess, handleError('Error getting user by username'));
+            return $http.get('/api/users/' + username);
         }
 
         function Create(user) {

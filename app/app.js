@@ -29,16 +29,16 @@ angular.module('myApp', [
 
 .run(['$rootScope', '$http', '$location', '$localStorage', function ($rootScope, $http, $location, $localStorage) {
         // keep user logged in after page refresh
-        if ($localStorage.currentUser) {
+        if ($localStorage.currentUser && $localStorage.currentUser.user) {
             $http.defaults.headers.common['x-access-token'] = $localStorage.currentUser.token;
-            $rootScope.username = $localStorage.currentUser.username;
+            $rootScope.user = $localStorage.currentUser.user;
         }
 
         // redirect to login page if not logged in and trying to access a restricted page
         $rootScope.$on('$locationChangeStart', function () {
             var publicPages = ['/login', '/register'];
             var restrictedPage = publicPages.indexOf($location.path()) === -1;
-            if (restrictedPage && !$localStorage.currentUser) {
+            if (restrictedPage && (!$localStorage.currentUser || !$localStorage.currentUser.user)) {
                 $location.path('/login');
             }
         });

@@ -6,15 +6,18 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>My AngularJS App</title>
+  <title>Games on paper</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap-theme.min.css">
   <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/normalize.css">
   <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/main.css">
+  <link href="bower_components/bootstrap-fileinput/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css" />
   <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="registration/registration.css">
   <script src="bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="bower_components/bootstrap-fileinput/js/fileinput.min.js"></script>
   <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
   <script src="bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
 </head>
@@ -22,16 +25,47 @@
   <nav class="navbar navbar-default navbar-static-top">
     <div class="container">
       <div class="navbar-header">
-        <a class="navbar-brand" href="#">GPA FrontEnd Training</a>
+        <a class="navbar-brand" href="#">Games on paper</a>
       </div>
-      <ul class="nav navbar-nav">
-        <li><a href="#/gameTicTacToe">Tic Tac Toe</a></li>
-        <li><a href="#/gameDots">Dots</a></li>
-        <li><a href="#/gameChat">Chat</a></li>
+      <ul class="nav navbar-nav" ng-if="user">
+        <li>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Create game</a>
+          <ul class="dropdown-menu">
+            <li class="dropdown-header">Invite user to play</li>
+            <li><a href="#">Dots</a></li>
+            <li><a href="#">Tic Tac Toe</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Invitations <span class="badge">5</span></a>
+          <ul class="dropdown-menu">
+            <li class="dropdown-header">Incoming invitations</li>
+            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Joe invited you to play Dots! <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button> <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button> </a></li>
+            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Jane invited you to play Dots! <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button> <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button> </a></li>
+            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Jane invited you to play TicTacToe! <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button> <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button> </a></li>
+            <li class="divider"></li>
+            <li class="dropdown-header">Outgoing invitations</li>
+            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Joe invited to play Dots with you!  <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button> </a></li>
+            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Jane invited to play Dots with you! <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button> </a></li>
+            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Jane invited to play TicTacToe with you! <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button> </a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Active Games <span class="badge">5</span></a>
+          <ul class="dropdown-menu">
+            <li class="dropdown-header">Dots</li>
+            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Joe <label class="label label-default">4:4</label> <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Give it up!</button> </a></li>
+            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Jane <label class="label label-success">14:4</label> <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Give it up!</button> </a></li>
+            <li class="divider"></li>
+            <li class="dropdown-header">TicTacToe</li>
+            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Joe <label class="label label-default">4:4</label> <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Give it up!</button> </a></li>
+            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Jane <label class="label label-danger">1:4</label> <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Give it up!</button> </a></li>
+          </ul>
+        </li>
       </ul>
-      <ul class="nav navbar-nav navbar-right" ng-if="username">
-        <li><a class="navbar-brand"><strong>Hello, {{username}}!</strong></a></li>
-        <li><a href="#/login" class="navbar-brand"><strong>Logout</strong></a></li>
+      <ul class="nav navbar-nav navbar-right" ng-if="user">
+        <li><a class="navbar-brand"><strong><span><img class="img-circle" width="24" height="24" ng-src="{{user.avatar}}"/></span> {{user.username}}</strong></a></li>
+        <li><a href="#/login" class="navbar-brand"><strong><span class="glyphicon glyphicon-log-out"></span> Logout</strong></a></li>
       </ul>
     </div>
   </nav>
@@ -41,8 +75,6 @@
   <div class="container">
     <div ng-class="{ 'alert': flash, 'alert-success': flash.type === 'success', 'alert-danger': flash.type === 'error' }" ng-if="flash" ng-bind="flash.message"></div>
     <div ng-view></div>
-
-    <div>Angular seed app: v<span app-version></span></div>
   </div>
 
   <!-- In production use:
