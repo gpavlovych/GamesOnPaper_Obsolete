@@ -1,13 +1,25 @@
+.kv-avatar {
+    margin: auto;
+    max-width: 120px;
+    text-align: center;
+}
 .kv-avatar .file-preview-frame,.kv-avatar .file-preview-frame:hover {
     margin: 0;
     padding: 0;
     border: none;
     box-shadow: none;
+    max-width: 120px;
+    width: 100px;
     text-align: center;
+}
+.kv-avatar .file-footer-caption{
+    max-width: 120px;
+    width: 100px;
 }
 .kv-avatar .file-input {
     display: table-cell;
-    max-width: 220px;
+    max-width: 120px;width:100px;
+    margin: auto;
 }
 .kv-avatar .file-preview-image{
 }

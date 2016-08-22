@@ -34,7 +34,7 @@ angular.module('myApp.registration', ['ngRoute'])
                     showCaption: false,
                     showBrowse: false,
                     browseOnZoneClick: true,
-                    previewSettings: {image: {width: "auto", height: attrs['uploaderHeight']}},
+                    previewSettings: {image: {width: "100px", height: attrs['uploaderHeight']}},
                     removeLabel: '',
                     removeIcon: '<i class="glyphicon glyphicon-remove"></i>',
                     removeTitle: 'Cancel or reset changes',
@@ -52,7 +52,10 @@ angular.module('myApp.registration', ['ngRoute'])
         var vm = this;
 
         vm.register = register;
-
+        vm.goBack = goBack;
+        function goBack(){
+            window.history.back();
+        }
         function register() {
             vm.dataLoading = true;
             UserService.Create(vm.user)

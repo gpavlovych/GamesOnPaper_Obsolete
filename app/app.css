@@ -1,5 +1,25 @@
 /* app css stylesheet */
 
+.form-title{
+  text-align: center;
+  margin: 25px;
+}
+
+.button-form-group {
+  margin: 0 -40px -40px -40px;
+  padding: 15px 0 17px 0;
+  text-align: center;
+  -webkit-border-radius: 0 0 7px 7px;
+  -moz-border-radius: 0 0 7px 7px;
+  -ms-border-radius: 0 0 7px 7px;
+  -o-border-radius: 0 0 7px 7px;
+  border-radius: 0 0 7px 7px;
+}
+
+.button-form-group input[type="submit"],.button-form-group button{
+  margin:5px;
+}
+
 .menu {
   list-style: none;
   border-bottom: 0.1em solid black;
