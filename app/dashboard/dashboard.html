@@ -1,94 +1,129 @@
 <div class="col-sm-6 container">
-    <div class="panel panel-default">
+    <div class="panel panel-default panel-fixed">
+        <div class="panel-heading">
+            <h3 class="panel-title">Create Game</h3>
+        </div>
+        <div class="panel-body">
+            Invite users to play
+        </div>
+        <div class="panel-table">
+            <table class="table">
+                <tr ng-repeat="gameToBeCreated in gamesToBeCreated"><td><a href="#">{{gameToBeCreated}}</a></td></tr>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="col-sm-6 container">
+    <div class="panel panel-default panel-fixed">
         <div class="panel-heading">
             <h3 class="panel-title">Incoming invitations</h3>
         </div>
-        <table class="table">
-            <tr ng-repeat-start="incomingInvitation in incomingInvitations">
-                <td>
-                    <img ng-src="{{incomingInvitation.userPic}}" class="img-circle" width="50" height="50"/>
-                    {{incomingInvitation.userName}} invited you to play {{incomingInvitation.gameName}}!
-                </td>
-            </tr>
-            <tr ng-repeat-end>
-                <td>
-                    <button type="button" class="btn btn-default">Accept</button>
-                    <button type="button" class="btn btn-default">Decline</button>
-                </td>
-            </tr>
-        </table>
+        <div class="panel-body">
+            Invitations you've received
+        </div>
+        <div class="panel-table">
+            <table class="table">
+                <tr ng-repeat-start="incomingInvitation in incomingInvitations">
+                    <td>
+                        <img ng-src="{{incomingInvitation.userPic}}" class="img-circle" width="50" height="50"/>
+                        {{incomingInvitation.userName}} invited you to play {{incomingInvitation.gameName}}!
+                    </td>
+                </tr>
+                <tr ng-repeat-end>
+                    <td>
+                        <button type="button" class="btn btn-default">Accept</button>
+                        <button type="button" class="btn btn-default">Decline</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
 </div>
 <div class="col-sm-6 container">
-    <div class="panel panel-default">
+    <div class="panel panel-default panel-fixed">
         <div class="panel-heading">
             <h3 class="panel-title">Outgoing invitations</h3>
         </div>
-        <table class="table">
-            <tr ng-repeat-start="outgoingInvitation in outgoingInvitations">
-                <td>
-                    <img ng-src="{{outgoingInvitation.userPic}}" class="img-circle" width="50" height="50"/>
-                    {{outgoingInvitation.userName}} invited to play {{outgoingInvitation.gameName}} with you!
-                </td>
-            </tr>
-            <tr ng-repeat-end>
-                <td>
-                    <button type="button" class="btn btn-default">Decline</button>
-                </td>
-            </tr>
-        </table>
+        <div class="panel-body">
+            Invitations you've sent
+        </div>
+        <div class="panel-table">
+            <table class="table">
+                <tr ng-repeat-start="outgoingInvitation in outgoingInvitations">
+                    <td>
+                        <img ng-src="{{outgoingInvitation.userPic}}" class="img-circle" width="50" height="50"/>
+                        {{outgoingInvitation.userName}} invited to play {{outgoingInvitation.gameName}} with you!
+                    </td>
+                </tr>
+                <tr ng-repeat-end>
+                    <td>
+                        <button type="button" class="btn btn-default">Decline</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
 </div>
 <div class="col-sm-6 container">
-    <div class="panel panel-default">
+    <div class="panel panel-default panel-fixed">
         <div class="panel-heading">
             <h3 class="panel-title">Active Games</h3>
         </div>
-        <table class="table">
-            <tr ng-repeat-start="(key, games) in activeGames | groupBy: 'gameName'">
-                <td>{{key}}</td>
-            </tr>
-            <tr ng-repeat-start="activeGame in games">
-                <td>
-                    <img ng-src="{{activeGame.userPic}}" class="img-circle" width="50" height="50"/>
-                    {{activeGame.userName}} <label class="label" ng-class="{'label-default': activeGame.yourScore==activeGame.opponentScore, 'label-success': activeGame.yourScore>activeGame.opponentScore, 'label-danger': activeGame.yourScore<activeGame.opponentScore}">{{activeGame.yourScore}}:{{activeGame.opponentScore}}</label>
-                </td>
-            </tr>
-            <tr ng-repeat-end>
-                <td>
-                    <button type="button" class="btn btn-default" ng-if="!activeGame.finishedBy">Finish</button>
-                    <span ng-if="activeGame.finishedBy && activeGame.finishedBy!=user.username">
-                      {{activeGame.finishedBy}} wants to finish the game. Do you agree?
-                      <button type="button" class="btn btn-default">Accept</button>
-                      <button type="button" class="btn btn-default">Decline</button>
-                    </span>
-                    <span ng-if="activeGame.finishedBy && activeGame.finishedBy==user.username">
-                      You want to finish the game. Waiting for opponent decision.
-                      <button type="button" class="btn btn-default">Cancel</button>
-                    </span>
-                </td>
-            </tr>
-            <tr ng-repeat-end ng-show="false"><td>&nbsp;</td></tr>
-        </table>
+        <div class="panel-body">
+            Games which you are playing now
+        </div>
+        <div class="panel-table">
+            <table class="table">
+                <tr ng-repeat-start="(key, games) in activeGames | groupBy: 'gameName'">
+                    <td>{{key}}</td>
+                </tr>
+                <tr ng-repeat-start="activeGame in games">
+                    <td>
+                        <img ng-src="{{activeGame.userPic}}" class="img-circle" width="50" height="50"/>
+                        {{activeGame.userName}} <label class="label" ng-class="{'label-default': activeGame.yourScore==activeGame.opponentScore, 'label-success': activeGame.yourScore>activeGame.opponentScore, 'label-danger': activeGame.yourScore<activeGame.opponentScore}">{{activeGame.yourScore}}:{{activeGame.opponentScore}}</label>
+                    </td>
+                </tr>
+                <tr ng-repeat-end>
+                    <td>
+                        <button type="button" class="btn btn-default" ng-if="!activeGame.finishedBy">Finish</button>
+                        <span ng-if="activeGame.finishedBy && activeGame.finishedBy!=user.username">
+                          {{activeGame.finishedBy}} wants to finish the game. Do you agree?
+                          <button type="button" class="btn btn-default">Accept</button>
+                          <button type="button" class="btn btn-default">Decline</button>
+                        </span>
+                        <span ng-if="activeGame.finishedBy && activeGame.finishedBy==user.username">
+                          You want to finish the game. Waiting for opponent decision.
+                          <button type="button" class="btn btn-default">Cancel</button>
+                        </span>
+                    </td>
+                </tr>
+                <tr ng-repeat-end ng-show="false"><td>&nbsp;</td></tr>
+            </table>
+        </div>
     </div>
 </div>
 <div class="col-sm-6 container">
-    <div class="panel panel-default">
+    <div class="panel panel-default panel-fixed">
         <div class="panel-heading">
             <h3 class="panel-title">Finished Games</h3>
         </div>
-        <table class="table">
-            <tr ng-repeat-start="(key, games) in finishedGames | groupBy: 'gameName'">
-                <td>{{key}}</td>
-            </tr>
-            <tr ng-repeat="finishedGame in games">
-                <td>
-                    <img ng-src="{{finishedGame.userPic}}" class="img-circle" width="50" height="50"/>
-                    {{finishedGame.userName}} <label class="label" ng-class="{'label-default': finishedGame.yourScore==finishedGame.opponentScore, 'label-success': finishedGame.yourScore>finishedGame.opponentScore, 'label-danger': finishedGame.yourScore<finishedGame.opponentScore}">{{finishedGame.yourScore}}:{{finishedGame.opponentScore}}</label> @ {{finishedGame.endDate | date:'yyyy-MM-dd HH:mm:ss Z'}}
-                </td>
-            </tr>
-            <tr ng-repeat-end ng-show="false"></tr>
-            <tr><td><a href="#">Show more</a></td></tr>
-        </table>
+        <div class="panel-body">
+            Games you've played
+        </div>
+        <div class="panel-table">
+            <table class="table">
+                <tr ng-repeat-start="(key, games) in finishedGames | groupBy: 'gameName'">
+                    <td>{{key}}</td>
+                </tr>
+                <tr ng-repeat="finishedGame in games">
+                    <td>
+                        <img ng-src="{{finishedGame.userPic}}" class="img-circle" width="50" height="50"/>
+                        {{finishedGame.userName}} <label class="label" ng-class="{'label-default': finishedGame.yourScore==finishedGame.opponentScore, 'label-success': finishedGame.yourScore>finishedGame.opponentScore, 'label-danger': finishedGame.yourScore<finishedGame.opponentScore}">{{finishedGame.yourScore}}:{{finishedGame.opponentScore}}</label> @ {{finishedGame.endDate | date:'yyyy-MM-dd HH:mm:ss Z'}}
+                    </td>
+                </tr>
+                <tr ng-repeat-end ng-show="false"></tr>
+                <tr><td><a href="#">Show more</a></td></tr>
+            </table>
+        </div>
     </div>
 </div>

@@ -1,0 +1,16 @@
+.panel-fixed{
+    height: 400px;
+}
+.panel-fixed .panel-heading
+{
+    height: 50px;
+}
+.panel-fixed .panel-body
+ {
+     height: 50px;
+ }
+.panel-fixed .panel-table{
+    height: 300px !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;;
+}
