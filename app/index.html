@@ -32,34 +32,67 @@
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">Create game</a>
           <ul class="dropdown-menu">
             <li class="dropdown-header">Invite user to play</li>
-            <li><a href="#">Dots</a></li>
-            <li><a href="#">Tic Tac Toe</a></li>
+            <li ng-repeat="gameToBeCreated in gamesToBeCreated"><a href="#">{{gameToBeCreated}}</a></li>
           </ul>
         </li>
         <li>
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">Invitations <span class="badge">5</span></a>
           <ul class="dropdown-menu">
             <li class="dropdown-header">Incoming invitations</li>
-            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Joe invited you to play Dots! <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button> <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button> </a></li>
-            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Jane invited you to play Dots! <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button> <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button> </a></li>
-            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Jane invited you to play TicTacToe! <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button> <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button> </a></li>
+            <li ng-repeat="incomingInvitation in incomingInvitations">
+              <a href="#">
+                <img ng-src="{{incomingInvitation.userPic}}" class="img-circle" width="50" height="50"/>
+                {{incomingInvitation.userName}} invited you to play {{incomingInvitation.gameName}}!
+                <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button>
+                <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button>
+              </a>
+            </li>
             <li class="divider"></li>
             <li class="dropdown-header">Outgoing invitations</li>
-            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Joe invited to play Dots with you!  <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button> </a></li>
-            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Jane invited to play Dots with you! <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button> </a></li>
-            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Jane invited to play TicTacToe with you! <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button> </a></li>
+            <li ng-repeat="outgoingInvitation in outgoingInvitations">
+              <a href="#">
+                <img ng-src="{{outgoingInvitation.userPic}}" class="img-circle" width="50" height="50"/>
+                {{outgoingInvitation.userName}} invited to play {{outgoingInvitation.gameName}} with you!
+                <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button>
+              </a>
+            </li>
           </ul>
         </li>
         <li>
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">Active Games <span class="badge">5</span></a>
           <ul class="dropdown-menu">
-            <li class="dropdown-header">Dots</li>
-            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Joe <label class="label label-default">4:4</label> <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Give it up!</button> </a></li>
-            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Jane <label class="label label-success">14:4</label> <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Give it up!</button> </a></li>
-            <li class="divider"></li>
-            <li class="dropdown-header">TicTacToe</li>
-            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Joe <label class="label label-default">4:4</label> <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Give it up!</button> </a></li>
-            <li><a href="#"><img src="images/user-unknown.png" class="img-circle" width="50" height="50"/> Jane <label class="label label-danger">1:4</label> <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Give it up!</button> </a></li>
+            <li ng-repeat-start="(key, games) in activeGames | groupBy: 'gameName'" class="dropdown-header">{{key}}</li>
+            <li ng-repeat="activeGame in games">
+              <a href="#">
+                <img ng-src="{{activeGame.userPic}}" class="img-circle" width="50" height="50"/>
+                {{activeGame.userName}} <label class="label" ng-class="{'label-default': activeGame.yourScore==activeGame.opponentScore, 'label-success': activeGame.yourScore>activeGame.opponentScore, 'label-danger': activeGame.yourScore<activeGame.opponentScore}">{{activeGame.yourScore}}:{{activeGame.opponentScore}}</label>
+                <button type="button" class="btn btn-default" ng-if="!activeGame.finishedBy"><span class="glyphicon glyphicon-remove"></span> Finish</button>
+                <span ng-if="activeGame.finishedBy && activeGame.finishedBy!=user.username">
+                  {{activeGame.finishedBy}} wants to finish the game. Do you agree?
+                  <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button>
+                  <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button>
+                </span>
+                <span ng-if="activeGame.finishedBy && activeGame.finishedBy==user.username">
+                  You want to finish the game. Waiting for opponent decision.
+                  <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></button>
+                </span>
+              </a>
+            </li>
+            <li ng-repeat-end class="divider" ng-show="{{!$last}}"></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Finished Games <span class="badge">5</span></a>
+          <ul class="dropdown-menu">
+            <li ng-repeat-start="(key, games) in finishedGames | groupBy: 'gameName'" class="dropdown-header">{{key}}</li>
+            <li ng-repeat="finishedGame in games">
+              <a href="#">
+                <img ng-src="{{finishedGame.userPic}}" class="img-circle" width="50" height="50"/>
+                {{finishedGame.userName}} <label class="label" ng-class="{'label-default': finishedGame.yourScore==finishedGame.opponentScore, 'label-success': finishedGame.yourScore>finishedGame.opponentScore, 'label-danger': finishedGame.yourScore<finishedGame.opponentScore}">{{finishedGame.yourScore}}:{{finishedGame.opponentScore}}</label> @ {{finishedGame.endDate | date:'yyyy-MM-dd HH:mm:ss Z'}}
+              </a>
+            </li>
+            <li ng-repeat-end class="divider"></li>
+            <li><a href="#">Show more</a></li>
           </ul>
         </li>
       </ul>
@@ -74,7 +107,32 @@
   <![endif]-->
   <div class="container">
     <div ng-class="{ 'alert': flash, 'alert-success': flash.type === 'success', 'alert-danger': flash.type === 'error' }" ng-if="flash" ng-bind="flash.message"></div>
-    <div ng-view></div>
+    <div class="col-sm-9" ng-view></div>
+    <div class="col-sm-3 container">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">TOP-100</h3>
+        </div>
+        <div class="panel-body">
+          <p>Here is a list of top 100 most successful players:</p>
+        </div>
+        <!-- Table -->
+        <table class="table">
+          <tr>
+            <th>#</th>
+            <th>User</th>
+          </tr>
+          <tr ng-repeat="top100Player in top100Players">
+            <td>{{$index+1}}</td>
+            <td><img ng-src="{{top100Player.userPic}}" class="img-circle" width="50" height="50"/> {{top100Player.userName}}</td>
+          </tr>
+          <tr>
+            <td>&nbsp;</td>
+            <td><a href="#">Show more</a></td>
+          </tr>
+        </table>
+      </div>
+    </div>
   </div>
 
   <!-- In production use:
@@ -82,6 +140,7 @@
   -->
   <script src="bower_components/angular/angular.js"></script>
   <script src="bower_components/angular-route/angular-route.js"></script>
+  <script src="bower_components/angular-filter/dist/angular-filter.js"></script>
   <script src="bower_components/ngstorage/ngStorage.js"></script>
   <script src="bower_components/socket.io-client/socket.io.js"></script>
   <script src="bower_components/angular-socket-io/socket.js"></script>
@@ -90,6 +149,7 @@
   <script src="services/services.js"></script>
   <script src="registration/registration.js"></script>
   <script src="login/login.js"></script>
+  <script src="dashboard/dashboard.js"></script>
   <script src="gameTicTacToe/gameTicTacToe.js"></script>
   <script src="gameDots/gameDots.js"></script>
   <script src="gameChat/gameChat.js"></script>

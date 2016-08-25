@@ -1,54 +1,25 @@
+/**
+ * Created by pavlheo on 8/25/2016.
+ */
+/**
+ * Created by pavlheo on 7/3/2016.
+ */
 'use strict';
 
-// Declare app level module which depends on views, and components
-angular.module('myApp', [
-    'ngRoute',
-    'ngStorage',
-    'angular.filter',
-    'btford.socket-io',
-    'myApp.services',
-    'myApp.registration',
-    'myApp.login',
-    'myApp.gameTicTacToe',
-    'myApp.gameDots',
-    'myApp.gameChat',
-    'myApp.version',
-    'myApp.dashboard'
-])
+angular.module('myApp.dashboard', ['ngRoute'])
 
-.config(['$routeProvider', function($routeProvider) {
-        $routeProvider.otherwise({redirectTo: '/dashboard'});
+    .config(['$routeProvider', function($routeProvider) {
+        $routeProvider.when('/dashboard', {
+            templateUrl: 'dashboard/dashboard.html',
+            controller: 'DashboardCtrl'
+        });
     }])
-
-.factory('gameSocketFactory', ['socketFactory', '$localStorage', function (socketFactory, $localStorage) {
-        var socket = socketFactory({'ioSocket': io.connect('http://localhost:8188/')});
-        socket
-            .on('connect', function () {
-                console.log("connected");
-                socket.emit('authenticate', {token: $localStorage.currentUser.token}); // send the jwt
-            });
-        return socket;
-    }])
-    .service('gamesToBeCreated',['$http', function($http){
-        this.get = function(){
-            //TODO
-
-        };
-        this.create = function(){
-
-        };
-    }])
-.run(['$rootScope', '$http', '$location', '$localStorage', function ($rootScope, $http, $location, $localStorage) {
-        // keep user logged in after page refresh
-        if ($localStorage.currentUser && $localStorage.currentUser.user) {
-            $http.defaults.headers.common['x-access-token'] = $localStorage.currentUser.token;
-            $rootScope.user = $localStorage.currentUser.user;
-        }
-        $rootScope.gamesToBeCreated = [
+.controller("DashboardCtrl", ['$scope', '$rootScope', function($scope, $rootScope){
+        $scope.gamesToBeCreated = [
             "Dots",
             "TicTacToe"
         ];
-        $rootScope.incomingInvitations = [
+        $scope.incomingInvitations = [
             {
                 "userPic": "http://www3.pictures.zimbio.com/gi/Lisa+Ann+Adult+Video+News+Awards+Hard+Rock+HLm94w9bJBel.jpg",
                 "userName": "Lisa",
@@ -65,7 +36,7 @@ angular.module('myApp', [
                 "gameName": "TicTacToe"
             }
         ];
-        $rootScope.outgoingInvitations = [
+        $scope.outgoingInvitations = [
             {
                 "userPic": "http://dzwnexfz53ofs.cloudfront.net/headshots/mandingo_m_mandingo_adt_c%20.jpg",
                 "userName": "Mandingo",
@@ -82,7 +53,7 @@ angular.module('myApp', [
                 "gameName": "TicTacToe"
             }
         ];
-        $rootScope.activeGames = [
+        $scope.activeGames = [
             {
                 "userPic": "http://www3.pictures.zimbio.com/gi/Lisa+Ann+Adult+Video+News+Awards+Hard+Rock+HLm94w9bJBel.jpg",
                 "userName": "Lisa",
@@ -114,7 +85,7 @@ angular.module('myApp', [
                 "opponentScore": 4
             }
         ];
-        $rootScope.finishedGames = [
+        $scope.finishedGames = [
             {
                 "userPic": "http://www3.pictures.zimbio.com/gi/Lisa+Ann+Adult+Video+News+Awards+Hard+Rock+HLm94w9bJBel.jpg",
                 "userName": "Lisa",
@@ -148,7 +119,7 @@ angular.module('myApp', [
                 "opponentScore": 4
             }
         ];
-        $rootScope.top100Players = [
+        $scope.top100Players = [
             {
                 "userPic": "http://dzwnexfz53ofs.cloudfront.net/headshots/mandingo_m_mandingo_adt_c%20.jpg",
                 "userName": "Mandingo"
@@ -158,12 +129,5 @@ angular.module('myApp', [
                 "userName": "Lisa"
             }
         ];
-        // redirect to login page if not logged in and trying to access a restricted page
-        $rootScope.$on('$locationChangeStart', function () {
-            var publicPages = ['/login', '/register'];
-            var restrictedPage = publicPages.indexOf($location.path()) === -1;
-            if (restrictedPage && (!$localStorage.currentUser || !$localStorage.currentUser.user)) {
-                $location.path('/login');
-            }
-        });
+
     }]);
