@@ -1,5 +1,7 @@
-<div class="col-sm-6 container">
-    <div class="panel panel-default panel-fixed">
+<!--<div class="container">-->
+    <!--<h3>Masonry CSS with Bootstrap Panels</h3>-->
+<div class="row">
+    <div class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">Create Game</h3>
         </div>
@@ -11,10 +13,11 @@
                 <tr ng-repeat="gameToBeCreated in gamesToBeCreated"><td><a href="#">{{gameToBeCreated}}</a></td></tr>
             </table>
         </div>
+        <div class="panel-footer">
+            Show more...
+        </div>
     </div>
-</div>
-<div class="col-sm-6 container">
-    <div class="panel panel-default panel-fixed">
+    <div class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">Incoming invitations</h3>
         </div>
@@ -37,10 +40,11 @@
                 </tr>
             </table>
         </div>
+        <div class="panel-footer">
+            Show more...
+        </div>
     </div>
-</div>
-<div class="col-sm-6 container">
-    <div class="panel panel-default panel-fixed">
+    <div class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">Outgoing invitations</h3>
         </div>
@@ -62,10 +66,11 @@
                 </tr>
             </table>
         </div>
+        <div class="panel-footer">
+            Show more...
+        </div>
     </div>
-</div>
-<div class="col-sm-6 container">
-    <div class="panel panel-default panel-fixed">
+    <div class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">Active Games</h3>
         </div>
@@ -100,10 +105,11 @@
                 <tr ng-repeat-end ng-show="false"><td>&nbsp;</td></tr>
             </table>
         </div>
+        <div class="panel-footer">
+            Show more
+        </div>
     </div>
-</div>
-<div class="col-sm-6 container">
-    <div class="panel panel-default panel-fixed">
+    <div class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">Finished Games</h3>
         </div>
@@ -125,5 +131,9 @@
                 <tr><td><a href="#">Show more</a></td></tr>
             </table>
         </div>
+        <div class="panel-footer">
+            Show more...
+        </div>
     </div>
 </div>
+<!--</div>-->

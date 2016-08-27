@@ -1,16 +1,17 @@
-.panel-fixed{
-    height: 400px;
+*, *:before, *:after {box-sizing:  border-box !important;}
+
+
+.row {
+    -moz-column-width: 25em;
+    -webkit-column-width: 25em;
+    -moz-column-gap: .5em;
+    -webkit-column-gap: .5em;
+
 }
-.panel-fixed .panel-heading
-{
-    height: 50px;
-}
-.panel-fixed .panel-body
- {
-     height: 50px;
- }
-.panel-fixed .panel-table{
-    height: 300px !important;
-    max-height: 300px !important;
-    overflow-y: auto !important;;
+
+.panel {
+    display: inline-block;
+    margin:  .5em;
+    padding:  0;
+    width:98%;
 }

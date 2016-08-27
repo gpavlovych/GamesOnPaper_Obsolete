@@ -108,7 +108,8 @@
   <![endif]-->
   <div class="container">
     <div ng-class="{ 'alert': flash, 'alert-success': flash.type === 'success', 'alert-danger': flash.type === 'error' }" ng-if="flash" ng-bind="flash.message"></div>
-    <div class="col-sm-9" ng-view></div>
+    <div class="col-sm-9 container">
+    <div ng-view></div></div>
     <div class="col-sm-3 container">
       <div class="panel panel-default">
         <div class="panel-heading">
@@ -146,6 +147,7 @@
   <script src="bower_components/socket.io-client/socket.io.js"></script>
   <script src="bower_components/angular-socket-io/socket.js"></script>
   <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+  <script src="bower_components/masonry/dist/masonry.pkgd.min.js"></script>
   <script src="app.js"></script>
   <script src="services/services.js"></script>
   <script src="registration/registration.js"></script>
